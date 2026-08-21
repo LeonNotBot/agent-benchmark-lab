@@ -1,10 +1,15 @@
 # agent-benchmark-lab
 
 benchmarks/: benchmark 的通用说明、安装方式、数据格式、任务筛选规则、官方链接、公共 adapter 逻辑
+
 pinchbench/codex/: Codex 跑 PinchBench 的脚本、prompt、配置、手动记录
+
 pinchbench/opencode/: OpenCode 跑 PinchBench 的脚本、配置、记录
+
 configs/: 跨 benchmark/agent 复用的统一配置
+
 scripts/: 跨组合复用的小工具，比如结果汇总、清理、转换格式
+
 results/: 输出结果和实验记录
 
 
