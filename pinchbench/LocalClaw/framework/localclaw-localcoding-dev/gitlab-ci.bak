@@ -1,0 +1,48 @@
+stages:
+  - build
+
+variables:
+  PUBLISH_NAME: "local-claw-beta-setup.exe"
+  PUBLISH_DIR_NAME: "localclaw"
+  BUILD_NUMBER: $CI_PIPELINE_IID
+  VERSION: "1.0"
+
+before_script:
+  - chcp 65001
+  - $OutputEncoding = [System.Text.Encoding]::UTF8
+  - $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+  # - npm install -g pnpm
+  - fnm env --use-on-cd --shell powershell | Out-String | Invoke-Expression
+  - fnm use 22
+  - corepack enable
+  - corepack prepare pnpm@10.24.0 --activate
+  - echo $BUILD_DRIVE
+  - pnpm config set store-dir c:\\gitlab-runner\\pnpm-store24
+  - pnpm approve-builds
+
+build_windows:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev-for527"
+  script:
+    - pnpm install --frozen-lockfile
+    - echo "Building Local Claw beta installer for version $VERSION"
+
+    - pnpm run electron:build:win
+    - $exePath = Get-ChildItem -Path release\ -Filter *.exe -File | Select-Object -First 1
+    - $exeName = $exePath.BaseName
+
+    - $newFilename = $exeName + "_" + $BUILD_NUMBER + ".exe"
+    - echo "filename=$newFilename" > build.env
+    - echo $newFilename
+
+    - $dest_path="${BUILD_DRIVE}web\builds\localclaw\${newFilename}"
+    - echo $dest_path
+    - powershell -Command "New-Item -ItemType Directory -Path '${BUILD_DRIVE}web\builds\localclaw\' -Force"
+    - powershell -Command "Copy-Item -Path '$($exePath.FullName)' -Destination '${dest_path}' -Force"
+
+  artifacts:
+    reports:
+      dotenv: build.env
+    paths:
+      - build.env

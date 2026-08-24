@@ -1,0 +1,11 @@
+# 构建产物
+out/
+dist/
+dist-server/
+*.vsix
+
+# --assets 从仓库根拷入的可分发资源(打包时脚本生成,不入版本库)
+resources/claude-cli/
+resources/builtin-skills/
+resources/builtin-templates/
+webview-dist/

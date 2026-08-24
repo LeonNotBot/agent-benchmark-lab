@@ -1,0 +1,34 @@
+{
+  "tag": "14.1.1",
+  "selfReportedVersion": "14.1.1",
+  "source": "@lenovo/claude-cli (registry 包自带 vendor/ripgrep)",
+  "fetchedAt": "2026-07-22T00:00:00.000Z",
+  "note": "物料来源已从 microsoft/ripgrep-prebuilt v15.0.1 迁移到 registry 包 @lenovo/claude-cli 自带的 ripgrep 14.1.1 (rev 4649aa9700)。after-pack 按此 manifest 校验包内二进制,须与 stage-cli 暂存的 .cli-dist/vendor/ripgrep 保持一致。",
+  "binaries": {
+    "x64-win32": {
+      "file": "rg.exe",
+      "sha256": "f162b54de2adfc72d78adb1dbada2dedda111ae0a5e2f6e9500f4f909664c5d2",
+      "target": "x86_64-pc-windows-msvc"
+    },
+    "x64-darwin": {
+      "file": "rg",
+      "sha256": "f999495980a5e6f1e7d26461ef5768b4013a62df610ed7d77a8b2de247a5b228",
+      "target": "x86_64-apple-darwin"
+    },
+    "arm64-darwin": {
+      "file": "rg",
+      "sha256": "6ef40346bf31fcce79d9614c7745c198542925a0c7d4911e1ffe794c53392ac1",
+      "target": "aarch64-apple-darwin"
+    },
+    "x64-linux": {
+      "file": "rg",
+      "sha256": "193906679498de4d939345b937fa24e0e69a03c244bd70c859f5e41232713f21",
+      "target": "x86_64-unknown-linux-musl"
+    },
+    "arm64-linux": {
+      "file": "rg",
+      "sha256": "e152ea689d6e8420357e592f0d8253b96476c164118ca3e6e13074fa1705ddda",
+      "target": "aarch64-unknown-linux-musl"
+    }
+  }
+}

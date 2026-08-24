@@ -1,0 +1,10 @@
+task_pricing_research
+task_it_procurement
+task_eu_regulation_research
+task_csv_life_exp_change
+task_csv_gdp_ranking
+task_log_mapreduce_failures
+task_log_mapreduce_resources
+task_meeting_gov_qa_extract
+task_meeting_gov_controversy
+task_log_syslog_boot

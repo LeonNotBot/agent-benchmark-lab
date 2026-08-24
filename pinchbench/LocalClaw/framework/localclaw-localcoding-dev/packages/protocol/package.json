@@ -1,0 +1,27 @@
+{
+  "name": "@lenovo/agent-protocol",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Shared protocol & domain types for the Lenovo Agent SDK (wire contracts: ServerEvent/ClientEvent; domain types: routing/session/channel/diff/scheduled). Pure types, zero runtime.",
+  "main": "src/types.ts",
+  "types": "src/types.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "publishConfig": {
+    "registry": "https://registry-smb.lenovo.com",
+    "main": "dist/types.js",
+    "types": "dist/types.d.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.1.76"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

@@ -1,0 +1,56 @@
+schema: spec-driven
+
+# 项目上下文：创建每个 artifact 时会注入给 AI，帮助它贴合 localclaw 的真实约定。
+context: |
+  项目：localclaw（内部包名 localcoding），基于 claude-cli 封装的本地 AI 编程桌面应用。
+
+  技术栈：
+  - Monorepo：pnpm workspace（pnpm 10 / Node 24），包在 packages/*
+  - 前端 @local-claw/client：React 19 + TypeScript + Zustand（store 按 slice 拆分）+ Tailwind CSS 4 + WebSocket + @assistant-ui/react
+  - 后端 @local-claw/server：NestJS + ws（WebSocket）+ REST + SQLite（better-sqlite3），是 SDK 的薄壳消费者
+  - 核心 SDK @lenovo/agent-sdk：库式 NestJS 动态模块，收口 runner/routing/scheduled-task/session/gateway 等 capability
+  - 共享层：@lenovo/agent-protocol（事件/类型）、@lenovo/agent-sdk-channel（渠道集成）
+  - 桌面：Electron 41 + electron-builder；内嵌 @lenovo/claude-cli 产物
+
+  关键架构事实：
+  - 驱动链路：前端 WS → server → SDK RunnerService → spawn claude-cli 子进程（stdin/stdout 流式 JSON，进程复用缓存）
+  - 模型不直连，走本地网关 localhost:10086/v1，按 model name 路由到 Sky/OpenRouter/Ollama
+  - SDK 是被集成的库，server 消费它；改动优先落在 SDK 层，保持 server 薄壳
+  - SDK 有 api-extractor 基线（etc/*.api.md），公共 API 变动需同步基线（pnpm api:check / api:update）
+
+  约定：
+  - 用中文写 proposal / specs / design / tasks
+  - git 提交信息用中文；遵循仓库现有提交风格
+  - 测试用 vitest（根命令 pnpm test 覆盖 sdk 与 channel 包）
+  - 类型检查 pnpm typecheck；改动完成后应通过 typecheck 与相关 vitest
+  - 新建源码文件单文件不超过 100 行，超出则先建框架再增量补充
+
+  前端约定（@local-claw/client，packages/client/src）：
+  - 左侧导航：新增导航项统一走 sidebar/navItems.tsx 的 PANEL_NAV_ITEMS（PanelNavItem 结构 { view, labelKey, icon }），
+    数据由 NavRow 组件共享给 ThreadSidebar 与 PanelSidebarContent，禁止在各处重复定义导航；view 需扩展 AppView 联合类型。
+  - 国际化：所有面向用户的文案必须走 i18n，用 useLocale() 的 t() 解析、文案登记到 i18n/locales.ts，
+    导航等配置项用 labelKey 而非硬编码字符串；中英文都要补齐，不留裸中文/裸英文。
+  - 主题：必须同时适配浅色与深色，用 Tailwind 的 dark: 变体成对给样式，不允许只写浅色或用固定色值破坏暗色。
+  - 二级弹窗：样式要统一，复用同一套弹窗基座（如 components/ConfirmDialog 的模式）而非各模块自搓，
+    保证遮罩/圆角/间距/按钮布局/深浅色一致；现状各模块散落自建 Dialog，新增弹窗应向统一基座收敛。
+  - 目录组织：新增一个业务模块必须新建独立文件夹组织代码（对齐现有 automation/ channels/ connectors/ secrets/ skills/ 等），
+    不把新模块代码塞进已有模块目录或散落到 components/。
+
+# 各 artifact 的定制规则
+rules:
+  proposal:
+    - 必须写明「非目标（Non-goals）」，界定不做什么
+    - 说明改动落在哪个包（client / server / sdk / protocol / channel），优先落 SDK 层
+    - 存量改动用 delta 思路描述「相对现状改了什么」，不重写全局
+  specs:
+    - 场景用 given/when/then 格式
+    - 用 ADDED / MODIFIED / REMOVED 标注对现有行为的增量
+  design:
+    - 涉及前后端交互时，写明 WS 事件名与 payload 结构，或 REST 端点
+    - 触及 SDK 公共 API 时，说明是否影响 api-extractor 基线
+    - 前端改动需说明：导航是否经 PANEL_NAV_ITEMS、文案是否走 i18n（中英文齐全）、
+      是否浅色深色成对适配、弹窗是否复用统一基座、新模块是否独立文件夹
+  tasks:
+    - 任务拆分到单条可独立验证，标注涉及的文件路径
+    - 收尾任务包含：通过 typecheck、相关 vitest、必要时 pnpm api:check
+    - 前端任务收尾需自检：i18n 中英文补齐、深浅色两种主题下均验证、弹窗样式与既有基座一致

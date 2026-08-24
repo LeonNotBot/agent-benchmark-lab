@@ -1,0 +1,136 @@
+{
+  "name": "localcoding",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "homepage": "https://github.com/cngaofei/local-claw",
+  "author": {
+    "name": "cngaofei",
+    "email": "cngaofei@gmail.com"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "node scripts/build-frontend.cjs && node scripts/build-server.cjs && node scripts/start-node.cjs",
+    "build": "node scripts/build-frontend.cjs",
+    "build:server": "node scripts/build-server.cjs",
+    "start:node": "node scripts/start-node.cjs",
+    "electron:dev": "node scripts/electron-dev.cjs",
+    "electron:build": "node scripts/electron-build.cjs --win --mac",
+    "electron:build:win": "node scripts/electron-build.cjs --win",
+    "electron:build:mac": "node scripts/electron-build.cjs --mac",
+    "electron:build:linux": "node scripts/electron-build.cjs --linux",
+    "inno:build": "node scripts/build-inno.cjs",
+    "api:check": "node scripts/api-check.cjs",
+    "api:update": "node scripts/api-check.cjs --update",
+    "test": "pnpm --filter @lenovo/agent-sdk --filter @lenovo/agent-sdk-channel run test",
+    "test:coverage": "pnpm --filter @lenovo/agent-sdk --filter @lenovo/agent-sdk-channel run test:coverage",
+    "typecheck": "pnpm --filter @lenovo/agent-sdk --filter @lenovo/agent-sdk-channel --filter @lenovo/agent-protocol run typecheck",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.17",
+    "better-sqlite3": "^12.0.0",
+    "dingtalk-stream": "^2.1.6-beta.1",
+    "js-yaml": "^4.1.1",
+    "qrcode": "^1.5.4",
+    "reflect-metadata": "^0.2.2",
+    "ssh2": "^1.17.0"
+  },
+  "devDependencies": {
+    "@assistant-ui/react": "^0.14.11",
+    "@changesets/cli": "^2.31.0",
+    "@electron/rebuild": "^4.0.3",
+    "@fission-ai/openspec": "^1.5.0",
+    "@microsoft/api-extractor": "^7.58.8",
+    "@types/adm-zip": "^0.5.8",
+    "@types/js-yaml": "^4.0.9",
+    "@vitest/coverage-v8": "^4.1.8",
+    "electron": "^41.0.0",
+    "electron-builder": "^26.8.1",
+    "esbuild": "^0.28.0",
+    "lucide-react": "^1.21.0",
+    "png-to-ico": "^3.0.1",
+    "sharp": "^0.34.5",
+    "typescript": "^5.4.5"
+  },
+  "build": {
+    "appId": "com.cngaofei.localcoding",
+    "productName": "LocalCoding",
+    "npmRebuild": false,
+    "electronDist": "node_modules/electron/dist",
+    "afterPack": "scripts/after-pack.cjs",
+    "directories": {
+      "output": "release"
+    },
+    "electronLanguages": [
+      "en-US",
+      "zh-CN"
+    ],
+    "files": [
+      "electron/**/*",
+      "dist/**/*",
+      "dist-server/**/*",
+      "dist-server/node_modules/**/*",
+      "node_modules/better-sqlite3/**/*",
+      "packages/server/node_modules/@modelcontextprotocol/sdk/**/*",
+      "node_modules/ssh2/**/*",
+      "node_modules/cpu-features/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**/*",
+      "packages/server/node_modules/@modelcontextprotocol/sdk/**/*",
+      "node_modules/ssh2/**/*",
+      "node_modules/cpu-features/**/*",
+      "dist-server/mcp-servers/**/*",
+      "dist-server/node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": ".cli-dist",
+        "to": "claude-cli",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "resources/builtin-skills",
+        "to": "builtin-skills",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "resources/builtin-templates",
+        "to": "builtin-templates",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": "assets/icon.icns"
+    },
+    "linux": {
+      "target": [
+        "deb"
+      ],
+      "icon": "assets/icon.png",
+      "category": "Utility"
+    }
+  }
+}

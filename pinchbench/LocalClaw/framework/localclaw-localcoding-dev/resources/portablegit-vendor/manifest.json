@@ -1,0 +1,12 @@
+{
+  "tag": "v2.54.0.windows.1",
+  "version": "2.54.0",
+  "source": "git-for-windows/git",
+  "sourceAsset": "PortableGit-2.54.0-64-bit.7z.exe",
+  "fetchedAt": "2026-07-01T11:12:47.176Z",
+  "note": "单份最小 bash 集（无 git，git 靠系统 PATH；不分架构，arm64 靠 WOW64 模拟）：bash + coreutils + msys dll。sha256 取 usr/bin/bash.exe。",
+  "bashRelPath": "usr/bin/bash.exe",
+  "dir": "minimal-bash",
+  "sha256": "92cff5f145d42f85b55aa3be8d3ad9827844a21ec4fbeaa1ddfe1dd4d76c6474",
+  "sizeMB": "16.8"
+}

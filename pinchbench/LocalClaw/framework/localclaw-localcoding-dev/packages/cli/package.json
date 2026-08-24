@@ -1,0 +1,31 @@
+{
+  "name": "@lenovo/agent-cli",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "LocalClaw 命令行工具：in-process 包装 vendored Claude CLI，注入隔离配置目录与端点凭据，源码零改动。",
+  "bin": {
+    "lc": "./bin/lc.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pack:standalone": "node scripts/pack-standalone.cjs"
+  },
+  "dependencies": {
+    "@lenovo/claude-cli": "^0.1.1"
+  },
+  "bundleDependencies": [
+    "@lenovo/claude-cli"
+  ],
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "typescript": "^5.4.5"
+  }
+}

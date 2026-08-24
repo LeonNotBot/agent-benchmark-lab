@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en" data-theme="claude" data-mode="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LocalCoding</title>
+  <link rel="icon" href="./logo.png" />
+  <link rel="stylesheet" href="./index.css" />
+  <script>
+    (function(){var t=localStorage.getItem("lc:theme")||localStorage.getItem("cc-webui:theme")||"claude-light";
+    var m={
+      "claude-light":{t:"claude",m:"light"},
+      "claude-dark":{t:"claude",m:"dark"},
+      "console-dark":{t:"console",m:"dark"}
+    };var c=m[t]||m["claude-light"];
+    document.documentElement.setAttribute("data-theme",c.t);
+    document.documentElement.setAttribute("data-mode",c.m);})();
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="./frontend.tsx"></script>
+</body>
+
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>用户注册</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(255,0,128,0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(0,200,255,0.3) 0%, transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(255,200,0,0.2) 0%, transparent 50%);
+  pointer-events: none;
+  animation: bgShift 8s ease-in-out infinite alternate;
+}
+@keyframes bgShift {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+.container {
+  width: 100%; max-width: 400px; position: relative; z-index: 1;
+}
+.card {
+  background: rgba(255,255,255,0.95);
+  border-radius: 24px; padding: 36px 28px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  animation: slideUp 0.6s ease-out;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.title {
+  font-size: 28px; font-weight: 700; text-align: center;
+  background: linear-gradient(135deg, #667eea, #e91e63, #ff9800);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+.subtitle {
+  text-align: center; color: #999; font-size: 13px; margin-bottom: 32px;
+}
+.input-group { margin-bottom: 20px; position: relative; }
+.input-group label {
+  display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;
+}
+.input-group input {
+  width: 100%; height: 48px; border: 2px solid #e8e8e8; border-radius: 12px;
+  padding: 0 14px; font-size: 15px; color: #333; outline: none;
+  transition: all 0.3s; background: #fafafa;
+}
+.input-group input:focus {
+  border-color: #667eea; background: #fff;
+  box-shadow: 0 0 0 4px rgba(102,126,234,0.15);
+}
+.input-group input.error {
+  border-color: #ff4757;
+  box-shadow: 0 0 0 4px rgba(255,71,87,0.1);
+}
+.code-row { display: flex; gap: 10px; }
+.code-row input { flex: 1; }
+.btn-code {
+  flex-shrink: 0; width: 110px; height: 48px;
+  border: none; border-radius: 12px; font-size: 13px; font-weight: 600;
+  color: #fff; cursor: pointer; transition: all 0.3s;
+  background: linear-gradient(135deg, #ff9800, #f44336);
+}
+.btn-code:active { transform: scale(0.95); }
+.btn-code:disabled {
+  background: #ccc; cursor: not-allowed; transform: none;
+}
+.error-msg { color: #ff4757; font-size: 12px; margin-top: 4px; display: none; }
+.btn-submit {
+  width: 100%; height: 52px; border: none; border-radius: 14px;
+  font-size: 17px; font-weight: 700; color: #fff; cursor: pointer;
+  margin-top: 8px; transition: all 0.3s;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+}
+.btn-submit:active { transform: scale(0.97); opacity: 0.9; }
+.btn-submit:disabled { background: #ccc; box-shadow: none; }
+.footer-text {
+  text-align: center; margin-top: 20px; font-size: 12px; color: #aaa;
+}
+.footer-text a { color: #667eea; text-decoration: none; font-weight: 600; }
+.toast {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600;
+  color: #fff; z-index: 999; opacity: 0; transition: opacity 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+.toast.success { background: linear-gradient(135deg, #00b894, #00cec9); }
+.toast.error { background: linear-gradient(135deg, #ff4757, #ff6348); }
+.spinner {
+  display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite;
+  vertical-align: middle; margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.strength-bar {
+  height: 4px; border-radius: 2px; margin-top: 6px; transition: all 0.3s;
+  background: #e8e8e8;
+}
+.strength-bar.weak { background: linear-gradient(90deg, #ff4757, #ff6348); width: 33%; }
+.strength-bar.medium { background: linear-gradient(90deg, #ff9800, #ffc107); width: 66%; }
+.strength-bar.strong { background: linear-gradient(90deg, #00b894, #00cec9); width: 100%; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="title">🎉 欢迎注册</div>
+    <div class="subtitle">创建账号，开启精彩之旅</div>
+    <form id="registerForm" autocomplete="off">
+      <div class="input-group">
+        <label>📱 手机号</label>
+        <input type="tel" id="phone" placeholder="请输入手机号" maxlength="11">
+        <div class="error-msg" id="phoneError"></div>
+      </div>
+      <div class="input-group">
+        <label>🔒 密码</label>
+        <input type="password" id="password" placeholder="请输入密码（6-20位）">
+        <div class="strength-bar" id="strengthBar"></div>
+        <div class="error-msg" id="pwdError"></div>
+      </div>
+      <div class="input-group">
+        <label>✉️ 验证码</label>
+        <div class="code-row">
+          <input type="text" id="code" placeholder="请输入验证码" maxlength="6">
+          <button type="button" class="btn-code" id="btnCode">获取验证码</button>
+        </div>
+        <div class="error-msg" id="codeError"></div>
+      </div>
+      <button type="submit" class="btn-submit" id="btnSubmit">注 册</button>
+    </form>
+    <div class="footer-text">
+      已有账号？<a href="#">立即登录</a>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const $ = s => document.querySelector(s);
+const phone = $('#phone'), password = $('#password'), code = $('#code');
+const btnCode = $('#btnCode'), btnSubmit = $('#btnSubmit');
+const toast = $('#toast');
+
+let countdown = 0, timer = null;
+
+function validatePhone(v) {
+  return /^1[3-9]\d{9}$/.test(v);
+}
+function validatePwd(v) {
+  return v.length >= 6 && v.length <= 20;
+}
+function showError(id, msg) {
+  const el = $('#' + id);
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+  const input = el.previousElementSibling;
+  if (input) input.classList.toggle('error', !!msg);
+}
+function showToast(msg, type) {
+  toast.textContent = msg;
+  toast.className = 'toast ' + type + ' show';
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+function updateStrength(v) {
+  const bar = $('#strengthBar');
+  bar.className = 'strength-bar';
+  if (v.length === 0) return;
+  let score = 0;
+  if (v.length >= 6) score++;
+  if (v.length >= 10) score++;
+  if (/[a-zA-Z]/.test(v) && /\d/.test(v)) score++;
+  if (/[^a-zA-Z0-9]/.test(v)) score++;
+  if (score <= 1) bar.classList.add('weak');
+  else if (score <= 2 && v.length >= 8) bar.classList.add('medium');
+  else bar.classList.add('strong');
+}
+
+phone.addEventListener('input', () => {
+  phone.value = phone.value.replace(/\D/g, '');
+  if (phone.value && !validatePhone(phone.value)) showError('phoneError', '请输入正确的11位手机号');
+  else showError('phoneError', '');
+});
+password.addEventListener('input', () => {
+  updateStrength(password.value);
+  if (password.value && !validatePwd(password.value)) showError('pwdError', '密码长度需在6-20位之间');
+  else showError('pwdError', '');
+});
+code.addEventListener('input', () => {
+  code.value = code.value.replace(/\D/g, '');
+  showError('codeError', '');
+});
+
+btnCode.addEventListener('click', () => {
+  if (countdown > 0) return;
+  if (!validatePhone(phone.value)) {
+    showError('phoneError', '请先输入正确的手机号');
+    return;
+  }
+  showError('phoneError', '');
+  countdown = 60;
+  btnCode.disabled = true;
+  btnCode.textContent = countdown + 's';
+  showToast('验证码已发送（模拟）', 'success');
+  timer = setInterval(() => {
+    countdown--;
+    btnCode.textContent = countdown + 's';
+    if (countdown <= 0) {
+      clearInterval(timer);
+      btnCode.disabled = false;
+      btnCode.textContent = '获取验证码';
+    }
+  }, 1000);
+});
+
+$('#registerForm').addEventListener('submit', e => {
+  e.preventDefault();
+  let valid = true;
+  if (!validatePhone(phone.value)) {
+    showError('phoneError', '请输入正确的手机号');
+    valid = false;
+  }
+  if (!validatePwd(password.value)) {
+    showError('pwdError', '密码长度需在6-20位之间');
+    valid = false;
+  }
+  if (!code.value || code.value.length < 4) {
+    showError('codeError', '请输入验证码');
+    valid = false;
+  }
+  if (!valid) return;
+  btnSubmit.disabled = true;
+  btnSubmit.innerHTML = '<span class="spinner"></span>注册中...';
+  setTimeout(() => {
+    showToast('🎉 注册成功！', 'success');
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = '注 册';
+    $('#registerForm').reset();
+    $('#strengthBar').className = 'strength-bar';
+  }, 1500);
+});
+</script>
+</body>
+</html>

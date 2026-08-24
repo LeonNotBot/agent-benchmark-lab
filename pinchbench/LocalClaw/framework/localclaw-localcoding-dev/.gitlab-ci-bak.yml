@@ -1,0 +1,77 @@
+stages:
+  - verify
+  - build
+
+variables:
+  PUBLISH_NAME: "local-claw-beta-setup.exe"
+  PUBLISH_DIR_NAME: "localclaw"
+  BUILD_NUMBER: $CI_PIPELINE_IID
+  VERSION: "1.0"
+  BUILD_DRIVE: "c:\\gitlab-runner\\"
+
+before_script:
+  - chcp 65001
+  - $OutputEncoding = [System.Text.Encoding]::UTF8
+  - $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+  # - npm install -g pnpm
+  - fnm env --use-on-cd --shell powershell | Out-String | Invoke-Expression
+  - fnm use 22
+  - corepack enable
+  - corepack prepare pnpm@10.24.0 --activate
+  - echo $BUILD_DRIVE
+  - pnpm config set store-dir c:\\gitlab-runner\\pnpm-store24
+  - pnpm approve-builds
+
+# 质量门禁：类型检查 + 公共 API 护栏 + 单测 + 覆盖率阈值。
+# 所有分支与 MR 都跑，任一失败即阻断合并。
+verify:
+  stage: verify
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+  script:
+    - pnpm install --frozen-lockfile
+    - pnpm run typecheck          # 类型零容忍
+    - pnpm run api:check          # 公共面未漂移（需配套 changeset）
+    - pnpm run test:coverage      # 全部用例 + 覆盖率门禁（vitest.config.ts thresholds）
+  coverage: '/Lines\s*:\s*([\d.]+)%/'
+  artifacts:
+    when: always
+    paths:
+      - packages/sdk/coverage/
+      - packages/channel/coverage/
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: packages/sdk/coverage/cobertura-coverage.xml
+
+build_windows:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev-for527"
+  script:
+    - pnpm install --frozen-lockfile
+    - echo "Building Local Claw beta installer for version $VERSION"
+
+    - pnpm run electron:build:win
+    - $exePath = Get-ChildItem -Path release\ -Filter local-claw-setup-*.exe -File | Select-Object -First 1
+    - $exeName = $exePath.BaseName
+
+    - $newFilename = $exeName + "_" + $BUILD_NUMBER + ".exe"
+    - echo "filename=$newFilename" > build.env
+    - echo $newFilename
+
+    - $dest_path="${BUILD_DRIVE}web\builds\localclaw\${newFilename}"
+    - echo $dest_path
+    - powershell -Command "New-Item -ItemType Directory -Path '${BUILD_DRIVE}web\builds\localclaw\' -Force"
+    - powershell -Command "Copy-Item -Path '$($exePath.FullName)' -Destination '${dest_path}' -Force"
+
+
+
+
+ 
+  artifacts:
+    reports:
+      dotenv: build.env
+    paths:
+      - build.env

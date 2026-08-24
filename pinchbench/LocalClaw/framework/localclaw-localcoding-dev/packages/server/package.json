@@ -1,0 +1,45 @@
+{
+  "name": "@local-claw/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.1.76",
+    "@larksuiteoapi/node-sdk": "^1.62.0",
+    "@lenovo/agent-sdk": "workspace:*",
+    "@lenovo/agent-sdk-channel": "workspace:*",
+    "@lenovo/agent-protocol": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/platform-ws": "^11.0.0",
+    "@nestjs/serve-static": "^5.0.0",
+    "@nestjs/websockets": "^11.0.0",
+    "@slack/bolt": "^4.6.0",
+    "@wecom/aibot-node-sdk": "^1.0.7",
+    "better-sqlite3": "^12.0.0",
+    "diff": "^9.0.0",
+    "dingtalk-stream": "^2.0.0",
+    "express": "^5.2.1",
+    "golembot": "^0.47.1",
+    "grammy": "^1.41.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "semver": "^7.6.0",
+    "ssh2": "^1.17.0",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/diff": "^7.0.2",
+    "@types/ssh2": "^1.15.5",
+    "@types/ws": "^8.18.1",
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.7"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "name": "@lenovo/agent-sdk-channel",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Channel (IM) capability for the Lenovo Agent SDK: Feishu / WeChat / DingTalk / Slack adapters via golembot. Depends on @lenovo/agent-sdk core.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "publishConfig": {
+    "registry": "https://registry-smb.lenovo.com",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts"
+  },
+  "dependencies": {
+    "@lenovo/agent-protocol": "workspace:*",
+    "@lenovo/agent-sdk": "workspace:*",
+    "@lenovo/claude-cli": "^0.1.1",
+    "golembot": "^0.47.1",
+    "ogg-opus-decoder": "1.7.3",
+    "qrcode": "^1.5.4"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "better-sqlite3": "^12.0.0",
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/qrcode": "^1.5.5",
+    "better-sqlite3": "^12.0.0",
+    "reflect-metadata": "^0.2.2",
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.7"
+  }
+}

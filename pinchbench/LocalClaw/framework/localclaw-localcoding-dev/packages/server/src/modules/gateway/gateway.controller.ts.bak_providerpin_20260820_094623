@@ -1,0 +1,340 @@
+import { Controller, Post, Get, Req, Res, Inject } from "@nestjs/common";
+import type { Request, Response } from "express";
+import { EndpointRegistryService } from "../routing/endpoint-registry.service";
+import { resolveUpstream, authHeaders } from "@lenovo/agent-sdk";
+import { resolveOutputCap, clampMaxTokens } from "./model-caps";
+import { normalizeOpenAIBody } from "./normalize-body";
+import { fetchWithRetry } from "./fetch-with-retry";
+
+const GATEWAY_TOKEN = "localclaw-internal";
+const ANTHROPIC_VERSION = "2023-06-01";
+
+@Controller("v1")
+export class GatewayController {
+  constructor(
+    @Inject(EndpointRegistryService)
+    private readonly endpointRegistry: EndpointRegistryService,
+  ) {}
+
+  /** OpenAI 路径鉴权：CLI 以 Authorization: Bearer <token> 打网关。 */
+  private checkAuth(req: Request, res: Response): boolean {
+    const auth = req.headers.authorization;
+    if (!auth || auth !== `Bearer ${GATEWAY_TOKEN}`) {
+      res.status(401).json({ error: { message: "Unauthorized", type: "auth_error" } });
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Anthropic 路径鉴权：CLI 原生模式下，ANTHROPIC_AUTH_TOKEN 走 Authorization: Bearer，
+   * ANTHROPIC_API_KEY 走 x-api-key。两者都接受网关假 token。
+   */
+  private checkAnthropicAuth(req: Request, res: Response): boolean {
+    const bearer = req.headers.authorization === `Bearer ${GATEWAY_TOKEN}`;
+    const apiKey = req.headers["x-api-key"] === GATEWAY_TOKEN;
+    if (!bearer && !apiKey) {
+      res.status(401).json({ error: { message: "Unauthorized", type: "auth_error" } });
+      return false;
+    }
+    return true;
+  }
+
+  /** 模型解析失败时的标准错误响应（两条路径共用）。 */
+  private respondUnresolved(modelId: string, res: Response): void {
+    const hasUsable = this.endpointRegistry.hasUsableEndpoint();
+    res.status(400).json({
+      error: hasUsable
+        ? {
+            code: "model_not_found",
+            message: `模型 "${modelId}" 不在任何已配置的服务中，请在设置里选择一个可用模型`,
+            type: "invalid_request_error",
+          }
+        : {
+            code: "no_endpoint_configured",
+            message: "尚未配置任何模型服务，请先在设置中添加一个服务商并填入 API Key",
+            type: "invalid_request_error",
+          },
+    });
+  }
+
+  /**
+   * 已记录过的 clamp 组合（`model:cap:clamped`），用于日志去重。
+   * 进程级缓存：key 空间仅「模型数 × cap」，实际上限几十个，无内存顾虑。
+   */
+  private readonly loggedClamps = new Set<string>();
+
+  /**
+   * 按模型输出 cap 裁剪 max_tokens，并对「同一 model+cap+clamped 组合」只打一次日志。
+   * CLI 在一次任务里发十几个子请求、每个都把 128000 裁到同一 cap——逐条打日志纯刷屏、
+   * 零信息增量。首次记录后静默。两条上游路径（OpenAI / Anthropic）共用此方法。
+   */
+  private clampWithLog(rawMaxTokens: unknown, upstreamModel: string, maxOutputTokens?: number): number {
+    const cap = resolveOutputCap(upstreamModel, maxOutputTokens);
+    const clamped = clampMaxTokens(rawMaxTokens, cap);
+    if (rawMaxTokens !== clamped) {
+      const key = `${upstreamModel}:${cap}:${clamped}`;
+      if (!this.loggedClamps.has(key)) {
+        this.loggedClamps.add(key);
+        console.log(`[gateway] clamp max_tokens ${rawMaxTokens} -> ${clamped} (model=${upstreamModel} cap=${cap})`);
+      }
+    }
+    return clamped;
+  }
+
+  @Post("chat/completions")
+  async chatCompletions(@Req() req: Request, @Res() res: Response): Promise<void> {
+    if (!this.checkAuth(req, res)) return;
+    const body = req.body;
+    const modelId = body.model;
+
+    const resolved = this.endpointRegistry.resolveModel(modelId);
+    if (!resolved) {
+      // 区分两种失败：完全没配置可用 endpoint vs 配了但模型名对不上。
+      // 前端据 code 决定是引导用户去配置，还是提示换模型。
+      this.respondUnresolved(modelId, res);
+      return;
+    }
+
+    const { endpoint, upstreamModel, model } = resolved;
+
+    // Anthropic 上游不应走到这条 OpenAI 路径：CLI 在 anthropic 模式下用原生协议打
+    // /v1/messages（见 buildGatewayAnthropicEnv）。若走到这里说明协议模式与 endpoint
+    // 错配，给出可诊断错误而非有损转换。
+    if (endpoint.apiType === "anthropic") {
+      res.status(400).json({
+        error: {
+          code: "protocol_mismatch",
+          message: `endpoint "${endpoint.id}" 是 Anthropic 协议，应通过 /v1/messages 原生访问，而非 /v1/chat/completions`,
+          type: "invalid_request_error",
+        },
+      });
+      return;
+    }
+
+    // 按模型输出 cap 裁剪 max_tokens：CLI 在 OpenAI 模式下常请求 128000，
+    // 超过上游模型 cap（如 sonnet-4-6=64000）会被拒 400。在出口处统一裁剪（日志去重见 clampWithLog）。
+    const clamped = this.clampWithLog(body.max_tokens, upstreamModel, model.maxOutputTokens);
+    let outBody = normalizeOpenAIBody({ ...body, model: upstreamModel, max_tokens: clamped });
+
+    // QWEN_WEBFETCH_REASONING_COMPAT_20260811
+    // KIMI_WEBFETCH_REASONING_COMPAT_20260812
+    //
+    // Claude CLI's built-in WebFetch performs an internal, tool-less streaming
+    // model call. With Qwen through OpenRouter, that sub-call can return both
+    // reasoning and valid content while the CLI's WebFetch adapter reports
+    // "No response from model". The main agent calls include tools, so keep
+    // them unchanged. For Qwen's tool-less streaming sub-calls only, ask
+    // OpenRouter to keep reasoning internally but omit reasoning fields from
+    // the response. The tested model and generated answer remain unchanged.
+    if (
+      outBody?.stream === true &&
+      (!Array.isArray(outBody?.tools) || outBody.tools.length === 0) &&
+      (upstreamModel === "qwen/qwen3.6-27b" ||
+       upstreamModel === "moonshotai/kimi-k3")
+    ) {
+      const priorReasoning =
+        outBody.reasoning && typeof outBody.reasoning === "object"
+          ? outBody.reasoning
+          : {};
+      outBody = {
+        ...outBody,
+        reasoning: { ...priorReasoning, exclude: true },
+      };
+    }
+
+    await this.proxyToOpenAI(endpoint, outBody, res);
+  }
+
+  /**
+   * Anthropic 原生透传路由。CLI 在 anthropic 模式下以原生协议打这里，网关只做
+   * 路由 + 注真实 key + 裁 max_tokens，然后**逐字节透传**上游 /v1/messages 的响应。
+   * 全程不解析 / 不转换 SSE —— tool_use / thinking / partial_json 零损耗。
+   */
+  @Post("messages")
+  async messages(@Req() req: Request, @Res() res: Response): Promise<void> {
+    if (!this.checkAnthropicAuth(req, res)) return;
+    const body = req.body;
+    const modelId = body.model;
+
+    const resolved = this.endpointRegistry.resolveModel(modelId);
+    if (!resolved) {
+      this.respondUnresolved(modelId, res);
+      return;
+    }
+
+    const { endpoint, upstreamModel, model } = resolved;
+
+    // 反向协议守卫：openai-compatible 上游不应走到这条 Anthropic 原生路径（镜像
+    // chat/completions 的 anthropic 守卫）。CLI 在 openai 模式下用 /v1/chat/completions，
+    // 走到这里说明协议模式与 endpoint 错配，给可诊断错误而非把 Anthropic 请求误透传到
+    // OpenAI 上游（会得到上游 404/400 的混乱报错）。
+    if (endpoint.apiType !== "anthropic") {
+      res.status(400).json({
+        error: {
+          code: "protocol_mismatch",
+          message: `endpoint "${endpoint.id}" 是 OpenAI 协议，应通过 /v1/chat/completions 访问，而非 /v1/messages`,
+          type: "invalid_request_error",
+        },
+      });
+      return;
+    }
+
+    // 裁剪 max_tokens 到模型 cap（与 OpenAI 路径同一套规则，日志去重见 clampWithLog）。
+    const clamped = this.clampWithLog(body.max_tokens, upstreamModel, model.maxOutputTokens);
+    const outBody = { ...body, model: upstreamModel, max_tokens: clamped };
+
+    await this.passthroughAnthropic(endpoint, outBody, req, res);
+  }
+
+  @Get("models")
+  listModels(@Req() req: Request, @Res() res: Response) {
+    if (!this.checkAuth(req, res)) return;
+    const models = this.endpointRegistry.getEnabled().flatMap(ep =>
+      ep.models.map(m => ({
+        id: m.id,
+        object: "model" as const,
+        created: 0,
+        owned_by: ep.id,
+      })),
+    );
+    res.json({ object: "list", data: models });
+  }
+
+  private async proxyToOpenAI(
+    endpoint: { baseUrl: string; apiKey: string; apiType?: string; channel?: string; azure?: { apiVersion: string } },
+    body: any,
+    res: Response,
+  ): Promise<void> {
+    // URL + auth 经 resolveUpstream(purpose=chat) 解析，与 test/list 三路同源。
+    // Azure OpenAI 由 azure-openai descriptor 处理：URL 嵌 deployment(=body.model) +
+    //  ?api-version=（取自 endpoint.azure），auth=api-key 头。其余 OpenAI 兼容上游忽略
+    //  model/azure，URL 只由 baseUrl 决定。body.model 此时已是上游真名（调用方已替换）。
+    const { url, auth } = resolveUpstream(
+      { baseUrl: endpoint.baseUrl, apiType: "openai-compatible", azure: endpoint.azure },
+      body.model ? { id: body.model } : undefined,
+      "chat",
+    );
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...authHeaders(auth, endpoint.apiKey),
+    };
+
+    // Azure：deployment 已编进 URL，body.model 是冗余遗留字段（Azure 忽略它）。
+    // 删掉保持请求体干净，避免 model 与 URL deployment 不一致时的潜在校验歧义。
+    const outBody = endpoint.azure ? (() => { const { model: _m, ...rest } = body; return rest; })() : body;
+
+    try {
+      // sky 等转换型上游存在间歇性 400 "Improperly formed request"（实测同一请求体
+      // 流式失败率约 17%，与请求格式无关）。在向客户端写任何数据前做有限重试，
+      // 把单轮失败率压到可忽略。一旦开始 pump 流就不能再重试。
+      const upstream = await fetchWithRetry(url, headers, outBody);
+
+      const ct = upstream.headers.get("content-type") || "";
+      // 上游返回 HTML（常见于 baseUrl 漏了 /v1，请求打到了网站首页而非 API）。
+      // 若原样转发，CLI 收到 HTML 解析失败会静默断开，表现为「发消息没反应」。
+      // 这里拦截并给出可诊断的明确错误，而不是把 HTML 透传出去。
+      if (ct.includes("text/html")) {
+        console.error(`[gateway] upstream returned HTML (status=${upstream.status}) from ${url} — baseUrl 可能漏了 /v1`);
+        res.status(502).json({
+          error: {
+            code: "upstream_not_api",
+            message: `上游 ${url} 返回了网页而非 API 响应，请检查该服务的 Base URL 是否正确（OpenAI 兼容服务通常需要以 /v1 结尾）`,
+            type: "upstream_error",
+          },
+        });
+        return;
+      }
+
+      res.status(upstream.status);
+      if (ct) res.setHeader("Content-Type", ct);
+
+      if (body.stream && upstream.body) {
+        const reader = (upstream.body as any).getReader();
+        const pump = async () => {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) { res.end(); break; }
+            res.write(value);
+          }
+        };
+        await pump();
+      } else {
+        const data = await upstream.text();
+        res.send(data);
+      }
+    } catch (err: any) {
+      console.error(`[gateway] proxy error to ${url}:`, err.message);
+      res.status(502).json({
+        error: { message: `Gateway error: ${err.message}`, type: "upstream_error" },
+      });
+    }
+  }
+
+  /**
+   * Anthropic 原生透传：注入真实上游 key，转发 anthropic-version / anthropic-beta，
+   * 逐字节回传上游响应（流式与非流式都不解析）。
+   */
+  private async passthroughAnthropic(
+    endpoint: { baseUrl: string; apiKey: string },
+    body: any,
+    req: Request,
+    res: Response,
+  ): Promise<void> {
+    // URL + auth 经 resolveUpstream(purpose=messages) 解析，与 test/list 三路同源。
+    const { url, auth } = resolveUpstream(
+      { baseUrl: endpoint.baseUrl, apiType: "anthropic" },
+      undefined,
+      "messages",
+    );
+    // CLI 带的 anthropic-version / anthropic-beta 原样转发；鉴权头换成真实上游 key。
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...authHeaders(auth, endpoint.apiKey),
+      "anthropic-version":
+        (req.headers["anthropic-version"] as string) || ANTHROPIC_VERSION,
+    };
+    const beta = req.headers["anthropic-beta"];
+    if (typeof beta === "string") headers["anthropic-beta"] = beta;
+
+    try {
+      const upstream = await fetchWithRetry(url, headers, body);
+
+      const ct = upstream.headers.get("content-type") || "";
+      // 上游返回 HTML（baseUrl 配错打到网页）：拦截给出可诊断错误，不透传 HTML。
+      if (ct.includes("text/html")) {
+        console.error(`[gateway] anthropic upstream returned HTML (status=${upstream.status}) from ${url}`);
+        res.status(502).json({
+          error: {
+            code: "upstream_not_api",
+            message: `上游 ${url} 返回了网页而非 API 响应，请检查该服务的 Base URL`,
+            type: "upstream_error",
+          },
+        });
+        return;
+      }
+
+      res.status(upstream.status);
+      if (ct) res.setHeader("Content-Type", ct);
+      const cacheControl = upstream.headers.get("cache-control");
+      if (cacheControl) res.setHeader("Cache-Control", cacheControl);
+
+      if (upstream.body) {
+        const reader = (upstream.body as any).getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) { res.end(); break; }
+          res.write(value);
+        }
+      } else {
+        const data = await upstream.text();
+        res.send(data);
+      }
+    } catch (err: any) {
+      console.error(`[gateway] anthropic passthrough error to ${url}:`, err.message);
+      res.status(502).json({
+        error: { message: `Gateway error: ${err.message}`, type: "upstream_error" },
+      });
+    }
+  }
+}

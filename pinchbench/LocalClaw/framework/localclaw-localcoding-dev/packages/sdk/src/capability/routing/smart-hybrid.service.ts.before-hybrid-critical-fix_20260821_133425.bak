@@ -1,0 +1,362 @@
+import { logger } from "../../util/logger";
+import { Injectable, OnModuleDestroy } from "@nestjs/common";
+import { join } from "path";
+import { existsSync, mkdirSync, writeFileSync, readFileSync, appendFileSync } from "fs";
+import type { SDKMessage } from "@anthropic-ai/claude-agent-sdk";
+import type { SmartHybridConfig } from "@lenovo/agent-protocol";
+
+export type EscalationEvent = {
+  active: boolean;
+  model: string;
+  from: string;
+};
+
+/** @deprecated Use EndpointRegistryService + gateway instead */
+export type ModelProvider = "openrouter" | "anthropic";
+
+// 网关地址跟随运行时端口（动态端口策略）：CLI 是 server 的子进程，继承 server 的
+// process.env.PORT；server 启动时该值由 Electron 主进程注入（被占用时已非 10086）。
+// 用函数而非模块常量，避免在 import 期（PORT 可能尚未注入）就把端口固化。
+function gatewayPort(): number {
+  return Number(process.env.PORT) || 10086;
+}
+const gatewayBaseUrl = () => `http://127.0.0.1:${gatewayPort()}/v1`;
+/** Anthropic 原生模式的网关根地址（不含 /v1）：CLI 自行补 /v1/messages，命中网关透传路由。 */
+const gatewayAnthropicBaseUrl = () => `http://127.0.0.1:${gatewayPort()}`;
+const GATEWAY_API_KEY = "localclaw-internal";
+const DEFAULT_CLOUD_MODEL = "claude-sonnet-4-6";
+const MARKER_START = "<!-- localclaw:critical-task-routing -->";
+const MARKER_END = "<!-- /localclaw:critical-task-routing -->";
+const MODEL_SWITCH_REGEX = /\[Model switched: (.+?) → (.+?)\]/;
+
+// Windows 专属：CLI 把 cwd 以反斜杠（D:\foo）呈现给模型，而 Bash 工具底层是
+// Git Bash（POSIX sh），反斜杠被当转义符 → 模型照抄反斜杠路径会导致命令解析失败。
+// 仅在 Windows 注入此规则，macOS/Linux 不加，避免噪音。
+const WINDOWS_BASH_PATH_NOTE =
+  process.platform === "win32"
+    ? [
+        "",
+        "## Bash Tool Paths (Windows)",
+        "",
+        "The Bash tool runs in Git Bash (POSIX sh), not PowerShell or cmd. In Bash",
+        "commands, always use forward slashes for paths. A Windows-style path like",
+        "`D:\\foo\\bar` must be written as `D:/foo/bar` — backslashes are escape",
+        "characters in Bash and will break the command. Do not end a quoted path",
+        "with a backslash (e.g. `\"D:/foo/\"` is fine, `\"D:\\foo\\\"` escapes the quote).",
+      ]
+    : [];
+
+const CLAUDE_MD_BLOCK = [
+  "",
+  MARKER_START,
+  "## Task Planning and Execution",
+  "",
+  "When answering a request would take working something out first — weighing options,",
+  "shaping an approach, resolving what is unclear — lay that thinking out as tasks with",
+  "TaskCreate before you act, one task per distinct decision or step. Do this even when",
+  "you could hold it all in your head; the plan is what makes each decision visible and",
+  "lets the harder ones get the care they need. For straightforward mechanical work with",
+  "one clear path, skip planning — it is only overhead there. Order tasks so that",
+  "prerequisites come first.",
+  "",
+  "As you work, keep task status current: `in_progress` when you start a task,",
+  "`completed` when it is done.",
+  "",
+  "Mark `critical: true` when a task's output turns on judgment rather than execution —",
+  "there is no single right answer, or a poor call would quietly undermine everything",
+  "built on top of it. Choosing how to model your data is such a task; renaming a variable",
+  "across files is not. Carry a critical task out as its own step; do not defer the thinking",
+  "into a later one. Leave `critical` off for work that only carries out a decision",
+  "already made.",
+  ...WINDOWS_BASH_PATH_NOTE,
+  MARKER_END,
+  "",
+].join("\n");
+
+/**
+ * Build env vars that point CLI at the localclaw gateway.
+ * All model routing is handled by the gateway based on model name.
+ * OPENAI_MODEL ensures resolveOpenAIModel() returns model name verbatim (path A).
+ * ANTHROPIC_MODEL sets initial mainLoopModel via getUserSpecifiedModelSetting().
+ */
+export function buildGatewayEnv(model: string): Record<string, string> {
+  return {
+    CLAUDE_CODE_USE_OPENAI: "1",
+    OPENAI_BASE_URL: gatewayBaseUrl(),
+    OPENAI_API_KEY: GATEWAY_API_KEY,
+    OPENAI_MODEL: model,
+    ANTHROPIC_MODEL: model,
+    // 不钉 OPENAI_DEFAULT_HAIKU_MODEL —— 让 CLI 的 getDefaultHaikuModel() 走 fallback
+    // 自动跟随 OPENAI_MODEL（当前主模型）。这样小模型请求（compact/标题/quota）始终用
+    // 当前主模型名（上游一定认），且换模型时随 set_model 改的 OPENAI_MODEL 实时跟随、永不馊。
+    //
+    // 为什么不钉成 model：钉成独立 env 副本后，运行时 set_model 切模型只更新 OPENAI_MODEL，
+    // 这个副本不跟上 → 换模型后小请求仍发旧主模型名（馊）。钉 pin 反而比不钉更易馊。
+    // 经实测确认：删 pin 后小请求出站 model = 当前主模型（精确 id），命中 gateway
+    // resolveModel 第 1 步精确匹配、走不到第 2 步档位模糊匹配，原 pin「顺带防误路由」的
+    // 作用在 fallback 路径下天然成立，无需 pin。
+    //
+    // 前提：当前主模型 id 必在某 enabled endpoint 的 models[].id 中（它本就从 endpoint 选出，恒成立）。
+    WEB_SEARCH_ADAPTER: "exa",
+  };
+}
+
+/**
+ * Anthropic 原生网关模式的 env：CLI 以 Anthropic 原生协议（/v1/messages）打本地网关，
+ * 网关透传到真实 Anthropic 上游。**不设** CLAUDE_CODE_USE_OPENAI —— 全程无协议转换，
+ * tool_use / thinking / partial_json 零损耗。
+ *
+ * ANTHROPIC_BASE_URL 指向网关根（不含 /v1，CLI 自行补 /v1/messages）；
+ * ANTHROPIC_AUTH_TOKEN 用网关假 token，真实上游 key 由网关按 endpoint 注入（多用户隔离）。
+ * 注意：buildSpawnEnv 只在 CLAUDE_CODE_USE_OPENAI=1 时删除 ANTHROPIC_BASE_URL/TOKEN，
+ * 本模式不设该标志，故这两个 env 会保留生效。
+ */
+export function buildGatewayAnthropicEnv(model: string): Record<string, string> {
+  return {
+    ANTHROPIC_BASE_URL: gatewayAnthropicBaseUrl(),
+    ANTHROPIC_AUTH_TOKEN: GATEWAY_API_KEY,
+    ANTHROPIC_MODEL: model,
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: model,
+    // Web 搜索后端：base 指向本地网关（非官方 anthropic 域名），CLI 的 server-side
+    // web search 不可用，默认会 fallback 到 exa。显式钉死 exa，避免依赖 fallback
+    // 巧合，并与 OpenAI 路径统一。见 buildGatewayEnv 同字段注释。
+    WEB_SEARCH_ADAPTER: "exa",
+  };
+}
+
+/**
+ * 直连渠道（channel="direct"）的 env：不设 CLAUDE_CODE_USE_OPENAI，让 CLI 以 Anthropic
+ * 原生协议直连上游。ANTHROPIC_BASE_URL/AUTH_TOKEN 由 buildSpawnEnv 从 process.env 继承
+ * （网关模式才会删除它们，直连模式保留）。这里只钉住主模型名。
+ *
+ * 注：用户可见的「全局 env 直连」(env-direct) 概念已移除（统一为走网关的 endpoint）。
+ * 此 builder 现仅为 bedrock/vertex 等「网关无法代签、必须 CLI 直连」的渠道预留。
+ */
+export function buildDirectEnv(model: string): Record<string, string> {
+  return {
+    ANTHROPIC_MODEL: model,
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: model,
+  };
+}
+
+// ── 部署渠道 env builder（框架占位，未落地）────────────────────────────────
+// Bedrock/Vertex/Foundry 用 AWS SigV4 / GCP OAuth 由 CLI 内置 SDK 直接对上游签名，
+// 本地透传网关无法代签 → 必须直连：凭据存进 EndpointConfig，spawn 时注入 env。
+// 这三个 builder 是落地时的明确锚点；当前抛错，避免静默走错路径。
+
+/** @internal Bedrock 直连 env（未落地）。落地时返回 CLAUDE_CODE_USE_BEDROCK=1 + AWS 凭据。 */
+export function buildBedrockEnv(_model: string): Record<string, string> {
+  throw new Error(
+    "bedrock 渠道尚未接入：落地需 CLAUDE_CODE_USE_BEDROCK=1 + AWS_REGION + AWS 凭据（或 AWS_BEARER_TOKEN_BEDROCK）",
+  );
+}
+
+/** @internal Vertex 直连 env（未落地）。落地时返回 CLAUDE_CODE_USE_VERTEX=1 + GCP 凭据。 */
+export function buildVertexEnv(_model: string): Record<string, string> {
+  throw new Error(
+    "vertex 渠道尚未接入：落地需 CLAUDE_CODE_USE_VERTEX=1 + ANTHROPIC_VERTEX_PROJECT_ID + CLOUD_ML_REGION + GOOGLE_APPLICATION_CREDENTIALS",
+  );
+}
+
+/** @internal Azure AI Foundry 直连 env（未落地）。落地时返回 CLAUDE_CODE_USE_FOUNDRY=1 + Foundry 凭据。 */
+export function buildFoundryEnv(_model: string): Record<string, string> {
+  throw new Error(
+    "foundry 渠道尚未接入：落地需 CLAUDE_CODE_USE_FOUNDRY=1 + ANTHROPIC_FOUNDRY_API_KEY + ANTHROPIC_FOUNDRY_RESOURCE/_BASE_URL",
+  );
+}
+
+/** @internal RoutingService 背后的智能混合打分/升级管线，非公共契约。 */
+@Injectable()
+export class SmartHybridService implements OnModuleDestroy {
+  private config: SmartHybridConfig | null = null;
+  /**
+   * cwd → 当前持有此 cwd CLAUDE.md 注入的 session 集合。空集时清理注入块。
+   *
+   * 租约绑定「会话是否为 SmartHybrid」这一领域真相，而非进程实例：进程 respawn
+   * （idle 淘汰 / fingerprint 变化）不改变持有关系，故不再产生 remove→append 抖动。
+   * 用 Set<sessionId> 而非计数：同一会话多次 spawn 幂等（重复 add 无副作用），
+   * 且天然去重——计数版会因「同会话 respawn 先 release 再 acquire」错误归零清块。
+   */
+  private readonly cwdHolders = new Map<string, Set<string>>();
+  /** sessionId → 它当前持有的 cwd。反向索引，供 releaseIfHeld/删会话时定位 cwd。 */
+  private readonly sessionCwd = new Map<string, string>();
+
+  configure(config: SmartHybridConfig | null): void {
+    if (!config) {
+      this.config = null;
+      logger.log(`[smart-hybrid] disabled`);
+      return;
+    }
+
+    this.config = config;
+    logger.log(
+      `[smart-hybrid] configured: default=${config.defaultModel.endpointId}/${config.defaultModel.model} upgrade=${config.upgradeModel.endpointId}/${config.upgradeModel.model}`,
+    );
+  }
+
+  isActive(): boolean {
+    return this.config !== null;
+  }
+
+  getConfig(): SmartHybridConfig | null {
+    return this.config;
+  }
+
+  buildEnvOverrides(
+    apiType: "anthropic" | "openai-compatible" = "openai-compatible",
+    configOverride?: SmartHybridConfig,
+  ): Record<string, string> {
+    // 会话级 config 优先（Composer 每会话选定）；缺省回落全局 this.config（渠道/兜底路径）。
+    const config = configOverride ?? this.config;
+    if (!config) return {};
+    // 协议由 default 模型所属 endpoint 的 apiType 决定（一个进程只能锁一种协议）。
+    // default 与 upgrade 跨协议的组合不支持——会被当作同一协议处理，详见 RoutingService。
+    const model = config.defaultModel.model;
+    const env = apiType === "anthropic"
+      ? buildGatewayAnthropicEnv(model)
+      : buildGatewayEnv(model);
+    env.CLAUDE_CODE_CRITICAL_MODEL = config.upgradeModel.model;
+    return env;
+  }
+
+  /**
+   * 为 sessionId 获取 cwd 的 CLAUDE.md 注入租约（幂等）。
+   *
+   * 同一 session 多次调用（respawn / prewarm 复用）：Set.add 去重，文件操作只在首次
+   * 执行——这是消除 remove→append 抖动的核心保证。
+   */
+  prepareSessionCwd(cwd: string, sessionId: string): void {
+    // 如果该 session 已迁移到别的 cwd，先释放旧的
+    const prevCwd = this.sessionCwd.get(sessionId);
+    if (prevCwd && prevCwd !== cwd) {
+      this._releaseOne(sessionId, prevCwd);
+    }
+
+    const holders = this.cwdHolders.get(cwd) ?? new Set<string>();
+    const alreadyHeld = holders.has(sessionId);
+    holders.add(sessionId);
+    this.cwdHolders.set(cwd, holders);
+    this.sessionCwd.set(sessionId, cwd);
+
+    // 已经持有：不重复写文件（消除 respawn 抖动的关键）
+    if (alreadyHeld) return;
+
+    try {
+      if (!existsSync(cwd)) mkdirSync(cwd, { recursive: true });
+      const path = join(cwd, "CLAUDE.md");
+      if (!existsSync(path)) {
+        writeFileSync(path, "# Project Instructions\n" + CLAUDE_MD_BLOCK, "utf8");
+        logger.log(`[smart-hybrid] created CLAUDE.md at ${path}`);
+        return;
+      }
+      const existing = readFileSync(path, "utf8");
+      const startIdx = existing.indexOf(MARKER_START);
+      if (startIdx !== -1) {
+        // 已有注入块：内容一致则跳过；不一致（如旧版本措辞）则整块替换升级。
+        const endIdx = existing.indexOf(MARKER_END);
+        if (endIdx === -1) return; // 标记残缺，交给 cleanup 兜底
+        const currentBlock = existing.slice(startIdx, endIdx + MARKER_END.length);
+        if (currentBlock === CLAUDE_MD_BLOCK.trim()) return;
+        const after = existing.slice(endIdx + MARKER_END.length);
+        const updated =
+          (existing.slice(0, startIdx) + CLAUDE_MD_BLOCK.trim() + after).replace(/\n{3,}/g, "\n\n").trimEnd() + "\n";
+        writeFileSync(path, updated, "utf8");
+        logger.log(`[smart-hybrid] refreshed critical-task block in ${path}`);
+        return;
+      }
+      const prefix = existing.endsWith("\n") ? "" : "\n";
+      appendFileSync(path, prefix + CLAUDE_MD_BLOCK, "utf8");
+      logger.log(`[smart-hybrid] appended critical-task block to ${path}`);
+    } catch (e) {
+      logger.warn(`[smart-hybrid] prepareSessionCwd failed:`, e);
+    }
+  }
+
+  /**
+   * 释放 sessionId 对某 cwd 的租约。最后一个 session 释放时清理注入块。
+   * 调用方通常不需要自己传 cwd——优先用 releaseIfHeld(sessionId)。
+   */
+  releaseSessionCwd(sessionId: string): void {
+    const cwd = this.sessionCwd.get(sessionId);
+    if (!cwd) return; // 该 session 从未持有租约，防御性跳过
+    this._releaseOne(sessionId, cwd);
+  }
+
+  /**
+   * 若 sessionId 当前持有租约则释放，否则幂等跳过。
+   * 用于"session 切回单模型"和"session 删除"两个触发点。
+   */
+  releaseIfHeld(sessionId: string): void {
+    this.releaseSessionCwd(sessionId);
+  }
+
+  /** 释放所有会话的租约并清理所有 cwd 的注入块（全局关闭 SH 时调用）。 */
+  releaseAll(): void {
+    for (const cwd of this.cwdHolders.keys()) {
+      this.cleanupSessionCwd(cwd);
+    }
+    this.cwdHolders.clear();
+    this.sessionCwd.clear();
+  }
+
+  /** 优雅退出时清理所有残留注入块，覆盖 Ctrl+C / Electron 关闭等正常终止路径。 */
+  onModuleDestroy(): void {
+    this.releaseAll();
+  }
+
+  private _releaseOne(sessionId: string, cwd: string): void {
+    const holders = this.cwdHolders.get(cwd);
+    if (!holders) return;
+    holders.delete(sessionId);
+    this.sessionCwd.delete(sessionId);
+    if (holders.size === 0) {
+      this.cwdHolders.delete(cwd);
+      this.cleanupSessionCwd(cwd);
+    }
+  }
+
+  cleanupSessionCwd(cwd: string): void {
+    const path = join(cwd, "CLAUDE.md");
+    if (!existsSync(path)) return;
+    try {
+      const content = readFileSync(path, "utf8");
+      const startIdx = content.indexOf(MARKER_START);
+      if (startIdx === -1) return;
+      const endIdx = content.indexOf(MARKER_END);
+      if (endIdx === -1) {
+        logger.warn(`[smart-hybrid] MARKER_END missing in ${path}, skipping cleanup`);
+        return;
+      }
+      const after = content.slice(endIdx + MARKER_END.length);
+      const cleaned = (content.slice(0, startIdx) + after).replace(/\n{3,}/g, "\n\n").trimEnd() + "\n";
+      writeFileSync(path, cleaned, "utf8");
+      logger.log(`[smart-hybrid] removed critical-task block from ${path}`);
+    } catch (e) {
+      logger.warn(`[smart-hybrid] cleanupSessionCwd failed:`, e);
+    }
+  }
+
+  detectEscalation(sdkMsg: SDKMessage, envOverrides: Record<string, string>): EscalationEvent | null {
+    if (sdkMsg.type !== "user") return null;
+    const userMsg = sdkMsg as any;
+    if (!Array.isArray(userMsg.message?.content)) return null;
+
+    for (const block of userMsg.message.content) {
+      if (block?.type === "tool_result" && typeof block.content === "string") {
+        const match = block.content.match(MODEL_SWITCH_REGEX);
+        if (match) {
+          const [, from, to] = match;
+          // SH 会话恒带 CLAUDE_CODE_CRITICAL_MODEL（holdsClaudeMdRef 就靠它判定）。
+          // active = 是否切到了升级模型；缺 env（非 SH 会话理论不该走到这）时保守判 false。
+          const criticalModel = envOverrides.CLAUDE_CODE_CRITICAL_MODEL;
+          const active = !!criticalModel && (to === criticalModel || to.includes(criticalModel));
+          logger.log(
+            `[smart-hybrid] escalation breadcrumb matched: from=${from} to=${to} critical=${criticalModel ?? "(none)"} active=${active}`,
+          );
+          return { active, model: to, from };
+        }
+      }
+    }
+    return null;
+  }
+}

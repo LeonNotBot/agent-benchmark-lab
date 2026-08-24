@@ -1,0 +1,98 @@
+{
+  "name": "@local-claw/vscode-ext",
+  "displayName": "LocalCoding",
+  "description": "LocalCoding AI 编码助手 — VSCode 原生集成",
+  "version": "0.1.0",
+  "private": true,
+  "publisher": "cngaofei",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "AI",
+    "Chat",
+    "Programming Languages"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "localcoding",
+          "title": "LocalCoding",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "localcoding": [
+        {
+          "id": "localcoding.sessions",
+          "name": "会话"
+        },
+        {
+          "type": "webview",
+          "id": "localcoding.chat",
+          "name": "对话"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "localcoding.restartServer",
+        "title": "LocalCoding: 重启后端服务"
+      },
+      {
+        "command": "localcoding.openInBrowser",
+        "title": "LocalCoding: 在浏览器中打开"
+      },
+      {
+        "command": "localcoding.newSession",
+        "title": "新对话",
+        "icon": "$(add)"
+      },
+      {
+        "command": "localcoding.openSession",
+        "title": "打开会话"
+      },
+      {
+        "command": "localcoding.deleteSession",
+        "title": "删除会话",
+        "icon": "$(trash)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "localcoding.newSession",
+          "when": "view == localcoding.sessions",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "localcoding.deleteSession",
+          "when": "view == localcoding.sessions && viewItem == localcoding.session",
+          "group": "inline"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build-ext.cjs",
+    "build:webview": "node ../../scripts/build-webview.cjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "package": "vsce package --no-dependencies"
+  },
+  "dependencies": {
+    "@lenovo/agent-protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.0.0",
+    "esbuild": "^0.28.0",
+    "typescript": "^5.4.5"
+  }
+}

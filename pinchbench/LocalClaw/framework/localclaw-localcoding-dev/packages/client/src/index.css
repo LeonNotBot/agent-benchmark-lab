@@ -1,0 +1,1275 @@
+@config "../tailwind.config.cjs";
+@import "tailwindcss";
+@import "highlight.js/styles/atom-one-light.css";
+
+/* JetBrains Mono：内置字体（woff2 随构建复制到 dist/assets/fonts），
+   不依赖用户机器是否安装。仅用于文件浏览相关组件（.font-code），不改全局等宽字体。 */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./assets/fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("./assets/fonts/jetbrains-mono-latin-600-normal.woff2") format("woff2");
+}
+
+/* 文件浏览专用等宽字体类：JetBrains Mono 优先，回退到系统等宽链 */
+.font-code {
+  font-family: "JetBrains Mono", "Cascadia Code", "Söhne Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/*
+ * Tailwind v4 的 preflight 不再默认给 button 设置 cursor:pointer（v3 曾有此行为），
+ * 导致「新对话」「删除」「设置」等控件悬停时仍显示箭头光标。这里统一兜底：
+ * 让原生可点击元素与 role=button、[onclick] 元素在可交互时显示手形光标，
+ * 禁用态(:disabled / aria-disabled) 仍保持默认箭头。
+ */
+button:not(:disabled):not([aria-disabled="true"]),
+[role="button"]:not([aria-disabled="true"]),
+label[for],
+summary,
+select:not(:disabled) {
+    cursor: pointer;
+}
+
+pre code.hljs {
+    background: transparent;
+    padding: 0;
+}
+
+/* 主题 CSS（atom-one-light）给 .hljs 自带浅灰背景 #fafafa；
+   文件预览用 <div class="hljs"> 承载，需强制透明与应用背景融合，避免灰块。 */
+.hljs {
+    background: transparent;
+}
+
+/* 浅色模式语法高亮覆盖：atom-one-light 的红/绿偏淡、属性名是棕金色，
+   这里对齐参考图，用高饱和的「标签红 / 属性蓝 / 字符串绿 / 关键字蓝」。
+   基础文字（标点、尖括号等裸文本）用近黑色，避免整体发灰。
+   暗色模式由下方 [data-mode=dark] 段以更高特异性覆盖，不受此段影响。 */
+.hljs {
+    color: #1f2328;
+}
+/* 标签名 <html> <meta> 等 → 纯红 */
+.hljs-name,
+.hljs-selector-tag,
+.hljs-section,
+.hljs-tag {
+    color: #D53538;
+}
+/* 属性名 lang/charset/name 等 → 蓝 */
+.hljs-attr,
+.hljs-selector-attr,
+.hljs-variable,
+.hljs-template-variable {
+    color: #0969ff;
+}
+/* 字符串 / 属性值 "UTF-8" 等 → 鲜绿 */
+.hljs-string,
+.hljs-attribute,
+.hljs-regexp,
+.hljs-addition,
+.hljs-meta .hljs-string {
+    color: #008809;
+}
+/* 关键字 / doctype 里的 html / 字面量 → 蓝 */
+.hljs-keyword,
+.hljs-doctag,
+.hljs-literal,
+.hljs-selector-id,
+.hljs-built_in,
+.hljs-type {
+    color: #0071EA;
+}
+/* 注释 → 灰 */
+.hljs-comment,
+.hljs-quote {
+    color: #6a737d;
+}
+/* 数字 → 橙 */
+.hljs-number {
+    color: #d9640a;
+}
+
+/* 暗色模式下用 GitHub Dark 高亮配色，避免浅色高亮文字在深底上不可见 */
+[data-mode=dark] .hljs {
+    color: #c9d1d9;
+    background: transparent;
+}
+[data-mode=dark] .hljs-doctag,
+[data-mode=dark] .hljs-keyword,
+[data-mode=dark] .hljs-meta .hljs-keyword,
+[data-mode=dark] .hljs-template-tag,
+[data-mode=dark] .hljs-template-variable,
+[data-mode=dark] .hljs-type,
+[data-mode=dark] .hljs-variable.language_ {
+    color: #ff7b72;
+}
+[data-mode=dark] .hljs-title,
+[data-mode=dark] .hljs-title.class_,
+[data-mode=dark] .hljs-title.class_.inherited__,
+[data-mode=dark] .hljs-title.function_ {
+    color: #d2a8ff;
+}
+[data-mode=dark] .hljs-attr,
+[data-mode=dark] .hljs-attribute,
+[data-mode=dark] .hljs-literal,
+[data-mode=dark] .hljs-meta,
+[data-mode=dark] .hljs-number,
+[data-mode=dark] .hljs-operator,
+[data-mode=dark] .hljs-variable,
+[data-mode=dark] .hljs-selector-attr,
+[data-mode=dark] .hljs-selector-class,
+[data-mode=dark] .hljs-selector-id {
+    color: #79c0ff;
+}
+[data-mode=dark] .hljs-regexp,
+[data-mode=dark] .hljs-string,
+[data-mode=dark] .hljs-meta .hljs-string {
+    color: #a5d6ff;
+}
+[data-mode=dark] .hljs-built_in,
+[data-mode=dark] .hljs-symbol {
+    color: #ffa657;
+}
+[data-mode=dark] .hljs-comment,
+[data-mode=dark] .hljs-code,
+[data-mode=dark] .hljs-formula {
+    color: #8b949e;
+}
+[data-mode=dark] .hljs-name,
+[data-mode=dark] .hljs-quote,
+[data-mode=dark] .hljs-selector-tag,
+[data-mode=dark] .hljs-selector-pseudo {
+    color: #7ee787;
+}
+[data-mode=dark] .hljs-subst {
+    color: #c9d1d9;
+}
+[data-mode=dark] .hljs-section {
+    color: #1f6feb;
+}
+[data-mode=dark] .hljs-bullet {
+    color: #f2cc60;
+}
+[data-mode=dark] .hljs-addition {
+    color: #aff5b4;
+    background-color: #033a16;
+}
+[data-mode=dark] .hljs-deletion {
+    color: #ffdcd7;
+    background-color: #67060c;
+}
+
+:root {
+    color-scheme: light;
+    --always-white: 0 0% 100%;
+    --always-black: 0 0% 0%
+}
+
+
+[data-theme=claude],
+[data-theme=claude][data-mode=light] {
+    /* Brand / Primary (Indigo-Violet) */
+    --accent-brand: 239 84% 67%;
+    --accent-main-000: 239 84% 67%;
+    --accent-main-100: 239 84% 67%;
+    --accent-main-200: 234 89% 74%;
+    --accent-main-900: 239 100% 4%;
+    --accent-pro-000: 258 90% 66%;
+    --accent-pro-100: 258 90% 66%;
+    --accent-pro-200: 258 90% 76%;
+    --accent-pro-900: 226 100% 97%;
+    /* Secondary accent */
+    --accent-secondary-000: 213 94% 68%;
+    --accent-secondary-100: 213 94% 68%;
+    --accent-secondary-200: 213 94% 68%;
+    --accent-secondary-900: 213 94% 95%;
+    /* Background */
+    --bg-000: 0 0% 100%;
+    --bg-100: 230 33% 98%;
+    --bg-200: 230 33% 96%;
+    --bg-300: 230 33% 94%;
+    --bg-400: 230 33% 91%;
+    --bg-500: 230 33% 91%;
+    --bg-600: 226 100% 97%;
+    --bg-700: 226 100% 0%;
+    /* Border */
+    --border-100: 230 30% 96%;
+    --border-200: 230 30% 93%;
+    --border-300: 230 30% 92%;
+    --border-400: 230 20% 69%;
+    /* Danger */
+    --danger-000: 0 84% 60%;
+    --danger-100: 0 84% 60%;
+    --danger-200: 0 84% 60%;
+    --danger-900: 0 100% 97%;
+    /* Warning */
+    --warning-000: 38 92% 50%;
+    --warning-100: 38 92% 50%;
+    --warning-200: 38 92% 50%;
+    --warning-900: 48 100% 94%;
+    /* Success */
+    --success-000: 160 84% 39%;
+    --success-100: 160 84% 39%;
+    --success-200: 160 84% 39%;
+    --success-900: 152 81% 96%;
+    /* Oncolor */
+    --oncolor-100: 0 0% 100%;
+    --oncolor-200: 0 0% 100%;
+    --oncolor-300: 0 0% 100%;
+    /* Pictogram / Icon background */
+    --pictogram-100: 230 33% 96%;
+    --pictogram-200: 230 33% 93%;
+    --pictogram-300: 230 30% 82%;
+    --pictogram-400: 230 20% 69%;
+    /* Text */
+    --text-000: 220 10% 18%;
+    --text-100: 220 10% 18%;
+    --text-200: 220 9% 34%;
+    --text-300: 220 9% 34%;
+    --text-400: 218 11% 65%;
+    --text-500: 218 11% 65%;
+    /* 辅助淡色（导航选中态、hover背景） */
+    --purple-light: 226 100% 94%;
+    --purple-light2: 226 100% 97%;
+    --purple-light3: 226 96% 91%;
+    /* 选中态文字色：保证在 purple-light2 底色上对比达标 */
+    --accent-text: 239 84% 60%;
+    /* 玻璃拟态 / 侧边栏表面（亮色） */
+    --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(238, 242, 255, 0.95) 100%);
+    --glass-panel: rgba(255, 255, 255, 0.92);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --nav-hover: rgba(255, 255, 255, 0.55);
+    --nav-active-surface: #ffffff;
+    --surface-light: rgba(255, 255, 255, 0.6);
+    /* 顶栏 / 侧边栏背景：统一使用 #F0F3FF(=hsl 228 100% 97%)，前台/后台态一致不变色 */
+    --chrome-bg: 228 100% 97%;
+    --chrome-bg-focused: 228 100% 97%
+}
+
+[data-theme=claude][data-mode=dark] {
+    color-scheme: dark;
+    --accent-brand: 239 84% 67%;
+    --accent-main-000: 239 84% 60%;
+    --accent-main-100: 239 84% 67%;
+    --accent-main-200: 234 89% 74%;
+    --accent-main-900: 239 100% 4%;
+    --accent-pro-000: 258 90% 66%;
+    --accent-pro-100: 258 90% 56%;
+    --accent-pro-200: 258 80% 45%;
+    --accent-pro-900: 250 25% 19%;
+    --accent-secondary-000: 213 94% 68%;
+    --accent-secondary-100: 213 94% 60%;
+    --accent-secondary-200: 213 94% 60%;
+    --accent-secondary-900: 213 56% 25%;
+    --bg-000: 230 15% 16%;
+    --bg-100: 230 15% 13%;
+    --bg-200: 230 12% 10%;
+    --bg-300: 230 12% 7%;
+    --bg-400: 230 15% 4%;
+    --bg-500: 230 15% 4%;
+    --border-100: 230 15% 40%;
+    --border-200: 230 15% 38%;
+    --border-300: 230 15% 36%;
+    --border-400: 230 15% 34%;
+    --danger-000: 0 98% 75%;
+    --danger-100: 0 67% 60%;
+    --danger-200: 0 67% 60%;
+    --danger-900: 0 47% 28%;
+    --oncolor-100: 0 0% 100%;
+    --oncolor-200: 230 10% 97%;
+    --oncolor-300: 230 10% 97%;
+    --pictogram-100: 230 12% 29%;
+    --pictogram-200: 230 12% 23%;
+    --pictogram-300: 230 15% 18%;
+    --pictogram-400: 230 15% 14%;
+    --success-000: 160 84% 46%;
+    --success-100: 160 75% 33%;
+    --success-200: 160 75% 33%;
+    --success-900: 160 100% 14%;
+    --text-000: 230 20% 97%;
+    --text-100: 230 20% 97%;
+    --text-200: 230 9% 74%;
+    --text-300: 230 9% 74%;
+    --text-400: 230 5% 59%;
+    --text-500: 230 5% 59%;
+    --warning-000: 38 71% 50%;
+    --warning-100: 38 93% 36%;
+    --warning-200: 38 93% 36%;
+    --warning-900: 45 95% 15%;
+    --purple-light: 239 38% 22%;
+    --purple-light2: 239 40% 25%;
+    --purple-light3: 239 36% 30%;
+    --accent-text: 233 100% 84%;
+    --glass-bg: linear-gradient(180deg, hsl(230 15% 18% / 0.92) 0%, hsl(230 15% 14% / 0.95) 100%);
+    --glass-panel: hsl(230 15% 16% / 0.92);
+    --glass-border: hsl(230 15% 30% / 0.5);
+    --nav-hover: hsl(230 15% 30% / 0.45);
+    --nav-active-surface: hsl(230 15% 22%);
+    --surface-light: hsl(230 15% 16% / 0.6)
+}
+
+@media (prefers-color-scheme: dark) {
+    [data-theme=claude] {
+        --accent-brand: 239 84% 67%;
+        --accent-main-000: 239 84% 60%;
+        --accent-main-100: 239 84% 67%;
+        --accent-main-200: 234 89% 74%;
+        --accent-main-900: 239 100% 4%;
+        --accent-pro-000: 258 90% 66%;
+        --accent-pro-100: 258 90% 56%;
+        --accent-pro-200: 258 80% 45%;
+        --accent-pro-900: 250 25% 19%;
+        --accent-secondary-000: 213 94% 68%;
+        --accent-secondary-100: 213 94% 60%;
+        --accent-secondary-200: 213 94% 60%;
+        --accent-secondary-900: 213 56% 25%;
+        --bg-000: 230 15% 16%;
+        --bg-100: 230 15% 13%;
+        --bg-200: 230 12% 10%;
+        --bg-300: 230 12% 7%;
+        --bg-400: 230 15% 4%;
+        --bg-500: 230 15% 4%;
+        --border-100: 230 15% 40%;
+        --border-200: 230 15% 38%;
+        --border-300: 230 15% 36%;
+        --border-400: 230 15% 34%;
+        --danger-000: 0 98% 75%;
+        --danger-100: 0 67% 60%;
+        --danger-200: 0 67% 60%;
+        --danger-900: 0 47% 28%;
+        --oncolor-100: 0 0% 100%;
+        --oncolor-200: 230 10% 97%;
+        --oncolor-300: 230 10% 97%;
+        --pictogram-100: 230 12% 29%;
+        --pictogram-200: 230 12% 23%;
+        --pictogram-300: 230 15% 18%;
+        --pictogram-400: 230 15% 14%;
+        --success-000: 160 84% 46%;
+        --success-100: 160 75% 33%;
+        --success-200: 160 75% 33%;
+        --success-900: 160 100% 14%;
+        --text-000: 230 20% 97%;
+        --text-100: 230 20% 97%;
+        --text-200: 230 9% 74%;
+        --text-300: 230 9% 74%;
+        --text-400: 230 5% 59%;
+        --text-500: 230 5% 59%;
+        --warning-000: 38 71% 50%;
+        --warning-100: 38 93% 36%;
+        --warning-200: 38 93% 36%;
+        --warning-900: 45 95% 15%;
+        --purple-light: 239 38% 22%;
+        --purple-light2: 239 40% 25%;
+        --purple-light3: 239 36% 30%;
+        --accent-text: 233 100% 84%;
+        --glass-bg: linear-gradient(180deg, hsl(230 15% 18% / 0.92) 0%, hsl(230 15% 14% / 0.95) 100%);
+        --glass-panel: hsl(230 15% 16% / 0.92);
+        --glass-border: hsl(230 15% 30% / 0.5);
+        --nav-hover: hsl(230 15% 30% / 0.45);
+        --nav-active-surface: hsl(230 15% 22%);
+        --surface-light: hsl(230 15% 16% / 0.6)
+    }
+}
+
+[data-theme=console],
+[data-theme=console][data-mode=dark] {
+    color-scheme: dark;
+    --accent-brand: 239 84% 67%;
+    --accent-main-000: 239 84% 60%;
+    --accent-main-100: 239 84% 55%;
+    --accent-main-200: 239 84% 50%;
+    --accent-main-900: 239 22% 20%;
+    --accent-pro-000: 258 90% 56%;
+    --accent-pro-100: 258 80% 45%;
+    --accent-pro-200: 258 70% 33%;
+    --accent-pro-900: 249 25% 19%;
+    --accent-secondary-000: 160 68% 32%;
+    --accent-secondary-100: 160 80% 28%;
+    --accent-secondary-200: 160 79% 25%;
+    --accent-secondary-900: 160 18% 16%;
+    --bg-000: 0 0% 6%;
+    --bg-100: 0 0% 10%;
+    --bg-200: 0 0% 14%;
+    --bg-300: 0 0% 17%;
+    --bg-400: 0 0% 19%;
+    --bg-500: 0 0% 23%;
+    --border-100: 0 0% 44%;
+    --border-200: 0 0% 40%;
+    --border-300: 0 0% 36%;
+    --border-400: 0 0% 32%;
+    --danger-000: 4 90% 80%;
+    --danger-100: 5 92% 73%;
+    --danger-200: 5 58% 34%;
+    --danger-900: 0 48% 17%;
+    --oncolor-100: 0 0% 100%;
+    --oncolor-200: 230 10% 97%;
+    --oncolor-300: 230 10% 97%;
+    --pictogram-100: 230 12% 29%;
+    --pictogram-200: 230 12% 23%;
+    --pictogram-300: 0 0% 6%;
+    --pictogram-400: 0 0% 10%;
+    --success-000: 160 84% 43%;
+    --success-100: 160 100% 18%;
+    --success-200: 160 100% 18%;
+    --success-900: 160 88% 10%;
+    --text-000: 0 0% 100%;
+    --text-100: 230 4% 95%;
+    --text-200: 230 2% 87%;
+    --text-300: 230 1% 72%;
+    --text-400: 230 1% 65%;
+    --text-500: 230 1% 48%;
+    --warning-000: 38 71% 50%;
+    --warning-100: 38 93% 36%;
+    --warning-200: 38 93% 36%;
+    --warning-900: 45 95% 15%;
+    --purple-light: 239 28% 15%;
+    --purple-light2: 239 30% 18%;
+    --purple-light3: 239 28% 24%;
+    --accent-text: 233 100% 85%;
+    --glass-bg: linear-gradient(180deg, hsl(0 0% 10% / 0.95) 0%, hsl(0 0% 6% / 0.97) 100%);
+    --glass-panel: hsl(0 0% 10% / 0.95);
+    --glass-border: hsl(0 0% 100% / 0.06);
+    --nav-hover: hsl(0 0% 100% / 0.06);
+    --nav-active-surface: hsl(0 0% 17%);
+    --surface-light: hsl(0 0% 10% / 0.6)
+}
+
+html,
+body,
+#root {
+    height: 100%;
+}
+
+html {
+    background-color: hsl(var(--bg-100));
+}
+
+body {
+    font-family: "Inter", "PingFang SC", "Noto Sans SC", system-ui, -apple-system, sans-serif;
+    background-color: hsl(var(--bg-000));
+    color: hsl(var(--text-000));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+hr {
+    height: 1px;
+    margin: 1.5rem 0;
+    border: 0;
+    background-color: hsl(var(--border-100));
+    opacity: 0.2;
+}
+
+/* 顶栏 / 侧边栏表面：默认（后台态）= bg-100；
+   应用在前台时根元素带 data-app-focused="true"，背景切到薄荷绿。
+   background-color 过渡实现前台/后台切换时的颜色渐变动画。 */
+.chrome-surface {
+    background-color: hsl(var(--chrome-bg));
+    transition: background-color 420ms ease;
+}
+
+[data-app-focused="true"] .chrome-surface {
+    background-color: hsl(var(--chrome-bg-focused));
+}
+
+/* 深色模式：chrome 背景用带蓝紫色相的低明度深色，呼应亮色态 #F0F3FF 的冷蓝紫；
+   前台/后台统一同值（与亮色态「聚焦不变色」逻辑一致），不再切深绿 */
+[data-mode=dark] {
+    --chrome-bg: 230 18% 15%;
+    --chrome-bg-focused: 230 18% 15%;
+}
+
+/* Markdown 表格边框：直接用全局 CSS 画线，避免 Tailwind v4 对 JS-config
+   颜色 utility(border-border / divide) 的 alpha-value 解析不可靠导致边框失效。
+   用 hsl(var(--border)) 不带 alpha 占位符的形式，确保深色模式下边线确定可见。
+   外框+圆角由 .md-table 容器负责(并裁切表格直角)，表格内部画完整网格线。 */
+.md-table {
+    border: 1px solid hsl(var(--border-100));
+}
+
+.md-table table {
+    border-collapse: collapse;
+}
+
+.md-table th,
+.md-table td {
+    border: 1px solid hsl(var(--border-200));
+}
+
+.md-table thead th {
+    border-bottom: 2px solid hsl(var(--border-100));
+}
+
+/* 去掉与外框重叠的表格最外圈竖边，避免双线 */
+.md-table tr > *:first-child {
+    border-left: 0;
+}
+
+.md-table tr > *:last-child {
+    border-right: 0;
+}
+
+.md-table thead tr:first-child > * {
+    border-top: 0;
+}
+
+.md-table tbody tr:last-child > * {
+    border-bottom: 0;
+}
+
+/* 深色模式：表格边线改用半透明白(rgba(255,255,255,0.4))，
+   等效 Tailwind 的 dark:border-zinc-500 视觉强度，但随背景自适应，
+   在任何深色主题(claude-dark / console 终端暗色)下都有稳定清晰的边界。 */
+[data-mode=dark] .md-table,
+[data-mode=dark] .md-table th,
+[data-mode=dark] .md-table td {
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+[data-mode=dark] .md-table thead th {
+    border-bottom-color: rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 768px) {
+
+    input,
+    textarea,
+    select {
+        font-size: 16px;
+    }
+}
+
+code,
+pre,
+textarea.mono,
+input.mono {
+    font-family: "Söhne Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* 滚动条样式：默认隐藏，滚动时显示。
+   颜色由 JS 在滚动元素上设置 --sb-thumb 内联变量控制（见 useGlobalScrollbar）。
+   用 CSS 变量而非 class，是为了不触发 assistant-ui Viewport 的 MutationObserver。 */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--sb-thumb, transparent);
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: background-color 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--sb-thumb-hover, var(--sb-thumb, transparent));
+    background-clip: content-box;
+}
+
+.font-serif {
+    font-family: sans-serif;
+}
+
+@layer components {}
+
+/* Voice wave animation */
+.voice-wave {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 16px;
+}
+
+.voice-wave span {
+    display: inline-block;
+    width: 2.5px;
+    border-radius: 2px;
+    background: currentColor;
+    animation: voice-wave 0.8s ease-in-out infinite;
+}
+
+.voice-wave span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.voice-wave span:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.voice-wave span:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+@keyframes voice-wave {
+
+    0%,
+    100% {
+        height: 4px;
+    }
+
+    50% {
+        height: 14px;
+    }
+}
+
+/* =============================================
+   全局组件样式 — 轻极简设计系统
+   ============================================= */
+
+/* 输入框聚焦态：indigo 边框 */
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: #6366F1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
+}
+
+/* 新 Composer 内的 textarea 不要 focus 边框/阴影 */
+textarea.composer-input:focus {
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* 无边框输入：豁免上面的全局聚焦态(紫色边框+阴影)，用于自动化弹窗的标题/提示词等 */
+.no-focus-ring:focus {
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Composer 自适应高度的基线：空态单行，行高稳定（高度由 JS 按 scrollHeight 撑开） */
+textarea.composer-input {
+    min-height: 28px;
+    line-height: 1.5;
+}
+
+/* 卡片悬浮态 */
+.card-hover {
+    transition: all 0.2s ease;
+}
+
+.card-hover:hover {
+    background-color: hsl(var(--purple-light2));
+    border-color: rgba(99, 102, 241, 0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+/* 通用卡片样式 */
+.card-base {
+    background: hsl(var(--bg-000));
+    border: 1px solid hsl(var(--border-300));
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.06), 0 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+/* 录音按钮渐变 */
+.btn-record-gradient {
+    background: linear-gradient(135deg, #6366F1 0%, #A78BFA 100%);
+    border: none;
+    color: white;
+}
+
+.btn-record-gradient:hover {
+    background: linear-gradient(135deg, #4F46E5 0%, #818CF8 100%);
+}
+
+/* 品牌主按钮 */
+.btn-primary {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25), 0 2px 4px rgba(139, 92, 246, 0.12);
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35), 0 2px 6px rgba(139, 92, 246, 0.15);
+}
+
+.btn-primary:active {
+    opacity: 0.85;
+}
+
+/* 次级按钮 */
+.btn-secondary {
+    background: hsl(var(--bg-000));
+    color: hsl(var(--accent-brand));
+    border: 1px solid hsl(var(--border-300));
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background: hsl(var(--purple-light2));
+    border-color: hsl(var(--accent-brand));
+}
+
+/* 品牌文字高亮 */
+.text-brand {
+    color: hsl(var(--accent-brand));
+}
+
+.text-brand-hover:hover {
+    color: #4F46E5;
+}
+
+/* 标题层级 */
+.text-title-primary {
+    color: hsl(var(--accent-brand));
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 1.3;
+}
+
+.text-title-secondary {
+    color: hsl(var(--text-200));
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.text-body {
+    color: hsl(var(--text-300));
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.text-helper {
+    color: hsl(var(--text-400));
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* 左侧导航选中态 */
+.nav-item-active {
+    background-color: hsl(var(--purple-light2)) !important;
+    color: hsl(var(--accent-text)) !important;
+    border-color: hsl(var(--accent-text)) !important;
+}
+
+.nav-item-active svg {
+    color: hsl(var(--accent-text));
+}
+
+.voice-wave-fill {
+    background: linear-gradient(298deg, #60A5FA -110.48%, #6366F1 -12.05%, #8B5CF6 84.44%);
+}
+
+/** Sidebar功能按钮选中状态样式 **/
+.sidebar-btn-active {
+    background-color: hsl(var(--purple-light2)) !important;
+    border-color: hsl(var(--accent-text)) !important;
+    color: hsl(var(--accent-text)) !important;
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.1);
+}
+
+/** 选中状态下的SVG图标颜色 **/
+.sidebar-btn-active svg {
+    color: hsl(var(--accent-text)) !important;
+}
+
+/** Select组件自定义样式 **/
+/** 隐藏原生箭头并添加自定义箭头，增加箭头与边线间距 **/
+.select-custom {
+    appearance: none;
+    background-image: url("./assets/arrow-icons.png");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 14px;
+    padding-right: 2.5rem;
+}
+
+.tab-border-active {
+    border-color: #6366F1;
+}
+
+/** Toast组件背景色样式 **/
+.bg-success {
+    background-color: #10b981;
+}
+
+.bg-danger {
+    background-color: #ef4444;
+}
+
+.bg-warning {
+    background-color: #f59e0b;
+}
+
+/**清理默认的textarea:focus样式**/
+.chat-prompt-area:focus {
+    outline: none;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+/* 左侧导航选中态 */
+.session-item-active {
+    background-color: hsl(var(--purple-light2)) !important;
+    border-color: hsl(262 61% 64%) !important;
+}
+
+.bg_surface-light {
+    background-color: var(--surface-light);
+}
+
+/* ========== New Sidebar v2 ========== */
+.sidebar-v2 {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px) saturate(180%);
+    border-right: 1px solid var(--glass-border);
+    box-shadow: 4px 0 24px rgba(99, 102, 241, 0.04);
+}
+
+.sidebar-v2-brand {
+    font-size: 15px;
+    font-weight: 600;
+    color: hsl(var(--text-100));
+    letter-spacing: 0.2px;
+}
+
+.sidebar-v2-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffffff 0%, #e0e7ff 70%);
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sidebar-v2-newchat {
+    width: 100%;
+    height: 44px;
+    border-radius: 9999px;
+    background: var(--nav-active-surface);
+    color: hsl(var(--accent-text));
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid transparent;
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.08), 0 1px 2px rgba(99, 102, 241, 0.06);
+    transition: all 0.18s ease;
+}
+
+.sidebar-v2-newchat:hover {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.18), 0 1px 2px rgba(99, 102, 241, 0.08);
+    transform: translateY(-0.5px);
+}
+
+.sidebar-v2-newchat:active {
+    transform: translateY(0);
+}
+
+.nav-v2-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: hsl(var(--text-100));
+    background: transparent;
+    border: 1px solid transparent;
+    position: relative;
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+    text-align: left;
+}
+
+.nav-v2-item:hover {
+    background-color: var(--nav-hover);
+}
+
+.nav-v2-item svg {
+    color: hsl(var(--text-200));
+    flex-shrink: 0;
+    transition: color 0.18s ease;
+}
+
+.nav-v2-item-active {
+    background: linear-gradient(135deg, #60A5FA 0%, #6366F1 50%, #8B5CF6 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+}
+
+.nav-v2-item-active svg {
+    color: #ffffff !important;
+}
+
+.nav-v2-caret {
+    margin-left: auto;
+    transition: transform 0.22s ease;
+    color: hsl(var(--text-400));
+    flex-shrink: 0;
+}
+
+.nav-v2-caret-open {
+    transform: rotate(180deg);
+}
+
+.nav-v2-sub {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.28s ease, opacity 0.2s ease;
+}
+
+.nav-v2-sub-open {
+    max-height: 2000px;
+    opacity: 1;
+    overflow: unset;
+}
+
+.nav-v2-sub-inner {
+    padding: 4px 0 2px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* 侧边栏主滚动区 */
+.sidebar-v2-nav {
+    /* scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.28) transparent; */
+}
+
+.sidebar-v2-nav::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-v2-nav::-webkit-scrollbar-thumb {
+    background-color: rgba(99, 102, 241, 0.28);
+    border-radius: 3px;
+}
+
+.sidebar-v2-nav::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(99, 102, 241, 0.45);
+}
+
+.sidebar-v2-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.nav-v2-subitem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px 8px 46px;
+    border-radius: 10px;
+    font-size: 13px;
+    color: hsl(var(--text-200));
+    background: transparent;
+    border: none;
+    text-align: left;
+    position: relative;
+    transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.nav-v2-subitem:hover {
+    background-color: var(--nav-hover);
+    color: hsl(var(--text-100));
+}
+
+.nav-v2-subitem-active {
+    background-color: var(--nav-active-surface) !important;
+    color: hsl(var(--accent-text)) !important;
+    font-weight: 500;
+}
+
+.nav-v2-subitem-active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: hsl(var(--accent-brand));
+}
+
+.nav-v2-divider {
+    height: 1px;
+    background: rgba(99, 102, 241, 0.12);
+    margin: 8px 4px;
+    border: 0;
+}
+
+.nav-v2-session {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.18s ease;
+    color: hsl(var(--text-200));
+}
+
+.nav-v2-session:hover {
+    background-color: var(--nav-hover);
+}
+
+.nav-v2-session-active {
+    background-color: var(--nav-active-surface) !important;
+    color: hsl(var(--accent-text)) !important;
+    box-shadow: 0 1px 2px rgba(99, 102, 241, 0.08);
+}
+
+.nav-v2-session-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: radial-gradient(circle at 30% 30%, var(--nav-active-surface) 0%, #e0e7ff 100%);
+    box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: hsl(var(--accent-brand));
+}
+
+/** Thinking loader - 8 dots rotating around a circle **/
+.thinking-loader {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+}
+
+.thinking-loader span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 3px;
+    height: 3px;
+    margin: -1.5px 0 0 -1.5px;
+    border-radius: 50%;
+    background: #818CF8;
+    transform-origin: 1.5px 1.5px;
+    animation: thinking-pulse 1.2s linear infinite;
+}
+
+.thinking-loader span:nth-child(1) {
+    transform: translate(0, -7px) scale(1);
+    animation-delay: -1.2s;
+}
+
+.thinking-loader span:nth-child(2) {
+    transform: translate(4.95px, -4.95px) scale(1);
+    animation-delay: -1.05s;
+}
+
+.thinking-loader span:nth-child(3) {
+    transform: translate(7px, 0) scale(1);
+    animation-delay: -0.9s;
+}
+
+.thinking-loader span:nth-child(4) {
+    transform: translate(4.95px, 4.95px) scale(1);
+    animation-delay: -0.75s;
+}
+
+.thinking-loader span:nth-child(5) {
+    transform: translate(0, 7px) scale(1);
+    animation-delay: -0.6s;
+}
+
+.thinking-loader span:nth-child(6) {
+    transform: translate(-4.95px, 4.95px) scale(1);
+    animation-delay: -0.45s;
+}
+
+.thinking-loader span:nth-child(7) {
+    transform: translate(-7px, 0) scale(1);
+    animation-delay: -0.3s;
+}
+
+.thinking-loader span:nth-child(8) {
+    transform: translate(-4.95px, -4.95px) scale(1);
+    animation-delay: -0.15s;
+}
+
+@keyframes thinking-pulse {
+    0% {
+        opacity: 0.2;
+    }
+
+    15% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.2;
+    }
+}
+
+.thinking-text {
+    font-size: 12px;
+    font-weight: 400;
+    color: hsl(var(--accent-brand));
+    letter-spacing: 0.2px;
+}
+
+.bg-main-000 {
+    background-color: hsl(var(--bg-000));
+}
+
+.bg-stop-100 {
+    background-color: hsl(var(--text-000));
+}
+
+.text-chat-done {
+    color: hsl(var(--text-400));
+}
+
+/* ========== Glass-morphism utilities ========== */
+.glass-morphism {
+    background: var(--glass-panel);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+}
+
+.glass-sidebar {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px) saturate(180%);
+    border-right: 1px solid var(--glass-border);
+    box-shadow: 4px 0 24px rgba(99, 102, 241, 0.04);
+}
+
+/* ========== Ambient background orbs ========== */
+.ambient-orb-1,
+.ambient-orb-2,
+.ambient-orb-3 {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+}
+
+.ambient-orb-1 {
+    width: 600px;
+    height: 600px;
+    top: -200px;
+    right: -100px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+}
+
+.ambient-orb-2 {
+    width: 500px;
+    height: 500px;
+    bottom: -150px;
+    left: -100px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+}
+
+.ambient-orb-3 {
+    width: 400px;
+    height: 400px;
+    top: 40%;
+    left: 30%;
+    background: radial-gradient(circle, rgba(96, 165, 250, 0.04) 0%, transparent 70%);
+}
+
+/* ========== User message bubble overrides ========== */
+.user-message-bubble,
+.user-message-bubble * {
+    color: white !important;
+}
+
+.user-message-bubble code {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.user-message-bubble a {
+    color: white !important;
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, 0.5);
+}
+
+.user-message-bubble a:hover {
+    text-decoration-color: white;
+}
+
+/* ── 隐私管理卡片：保险箱质感（亮闪闪 + 坚固）────────────────────── */
+
+/* 卡片斜向流光高光，hover 时扫过一次 */
+@keyframes secret-sheen {
+    0% { transform: translateX(-120%) skewX(-20deg); opacity: 0; }
+    20% { opacity: 0.55; }
+    100% { transform: translateX(220%) skewX(-20deg); opacity: 0; }
+}
+
+.secret-card {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.secret-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 45%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+    transform: translateX(-120%) skewX(-20deg);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.secret-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(var(--secret-glow, 99 102 241), 0.55);
+    box-shadow:
+        0 10px 30px -8px rgba(var(--secret-glow, 99 102 241), 0.35),
+        0 0 0 1px rgba(var(--secret-glow, 99 102 241), 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.secret-card:hover::before {
+    animation: secret-sheen 0.9s ease-out;
+}
+
+/* 图标徽章常驻柔光呼吸 */
+@keyframes secret-badge-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--secret-glow, 99 102 241), 0.0), 0 4px 12px -2px rgba(var(--secret-glow, 99 102 241), 0.45); }
+    50% { box-shadow: 0 0 0 4px rgba(var(--secret-glow, 99 102 241), 0.12), 0 6px 16px -2px rgba(var(--secret-glow, 99 102 241), 0.6); }
+}
+
+.secret-badge {
+    animation: secret-badge-glow 3.2s ease-in-out infinite;
+}

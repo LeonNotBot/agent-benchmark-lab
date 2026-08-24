@@ -1,0 +1,77 @@
+# dependencies
+node_modules
+dist
+# Allow vendored CLI bundle (force-tracked despite `dist` rule above)
+!packages/claude-cli/dist/
+# output
+out
+dist
+*.tgz
+*.trae
+*.playwright-mcp
+*.superpowers
+# code coverage
+coverage
+*.lcov
+
+# logs
+logs
+_.log
+report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+
+# dotenv environment variable files
+# 裸 .env 及所有 .env.* 一律忽略（曾误提交真实凭据，见 knowledge.service / origin TA、KBTest）；
+# 仅放行 .env.example 占位模板。
+.env
+.env.*
+!.env.example
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+.claude
+.localclaw
+
+# caches
+.eslintcache
+.cache
+*.tsbuildinfo
+
+# IntelliJ based IDEs
+.idea
+
+# Finder (MacOS) folder config
+.DS_Store
+
+# Electron build output
+release/
+release-build-*/
+release-fixed3/
+dist-server/
+ollama/
+
+CLAUDE.md
+
+webui.db
+webui.db-shm
+webui.db-wal
+webui.db.localclaw/
+.mcp.json
+.notes
+
+scripts/.electron-dev.lock
+vendor/
+.codegraph/
+# electron 打包前由 stage-cli.cjs 从 registry 版 @lenovo/claude-cli 暂存的 dist 中转目录
+.cli-dist/
+
+
+# api-extractor 中间产物（etc/*.api.md 是基线快照，需提交；temp/ 是临时分析结果，不提交）
+packages/*/temp/
+# OpenSpec 工作流：specs 与 changes 提交进 git，团队共享
+# 连接器文档仍为本地专用，不提交
+连接器/
+images/
+
+# gold-eval harness（本地验证工具，不进仓库）
+eval/

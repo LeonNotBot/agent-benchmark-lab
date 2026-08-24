@@ -1,0 +1,17 @@
+# 源码与配置(打包后用 out/extension.js,源码不入 vsix)
+src/**
+scripts/**
+tsconfig.json
+.vscode/**
+**/*.map
+**/*.ts
+
+# 扩展自身依赖不入包(用 --no-dependencies + esbuild 已内联)
+node_modules/**
+
+# 但 dist-server 的运行时依赖必须保留(server 子进程 require 它们)
+!dist-server/**
+!dist-server/node_modules/**
+
+# 保留:out(extension.js)、dist(前端 SPA,server ServeStatic 托管)、
+#       dist-server(server 及依赖)、resources(cli/内置)、media(图标)
