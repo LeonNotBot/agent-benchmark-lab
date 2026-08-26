@@ -1,0 +1,2 @@
+﻿pip 26.1.2 from C:\pinchbench-opencode\.venv\Lib\site-packages\pip (python 3.12)
+

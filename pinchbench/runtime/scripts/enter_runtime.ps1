@@ -1,0 +1,10 @@
+﻿$env:PINCHBENCH_RUNTIME="C:\pinchbench-runtime"
+$env:PINCHBENCH_PYTHON="C:\pinchbench-runtime\.venv\Scripts\python.exe"
+$env:PINCHBENCH_SKILL="C:\pinchbench-runtime\skill"
+$env:HTTP_PROXY="http://127.0.0.1:10090"
+$env:HTTPS_PROXY="http://127.0.0.1:10090"
+$env:ALL_PROXY="http://127.0.0.1:10090"
+$env:NO_PROXY="localhost,127.0.0.1,::1"
+if([string]::IsNullOrWhiteSpace($env:OPENROUTER_API_KEY)){Write-Warning "OPENROUTER_API_KEY is not set in this PowerShell session"}
+Write-Host "PINCHBENCH_PYTHON=$env:PINCHBENCH_PYTHON"
+Write-Host "PINCHBENCH_SKILL=$env:PINCHBENCH_SKILL"
