@@ -1,0 +1,18 @@
+﻿{
+    "installed_at":  "2026-08-03T15:25:15.0180153+08:00",
+    "changed_common":  false,
+    "changed_runner":  false,
+    "runner_revision":  "2026-08-03-grok-build-windows-v1.0.1-search-adapter-0.1.3",
+    "adapter_expected_version":  "0.1.3",
+    "model":  "deepseek/deepseek-v4-pro",
+    "python":  "C:\\pinchbench-opencode\\.venv\\Scripts\\python.exe",
+    "common_sha256":  "4d0cdc45e6608b71523bb2868809855f9decfdf1b15b83f2d2448d29a257b9e8",
+    "runner_sha256":  "deec131aeef92e13a8fb0624445dbf91e4e8e3e04b1d4905eb487f2ac3526e4e",
+    "live_adapter":  {
+                         "ok":  true,
+                         "name":  "grok-build-search-adapter",
+                         "version":  "0.1.3",
+                         "target_model":  "deepseek/deepseek-v4-pro",
+                         "upstream":  "https://openrouter.ai/api/v1"
+                     }
+}

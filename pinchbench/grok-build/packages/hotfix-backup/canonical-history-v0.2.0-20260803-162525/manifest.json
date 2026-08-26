@@ -1,0 +1,17 @@
+﻿{
+    "installed_at":  "2026-08-03T16:25:27.9085263+08:00",
+    "backup":  "C:\\pinchbench-grok-build\\packages\\hotfix-backup\\canonical-history-v0.2.0-20260803-162525",
+    "live_adapter_before_restart":  {
+                                        "ok":  true,
+                                        "name":  "grok-build-search-adapter",
+                                        "version":  "0.1.4",
+                                        "target_model":  "deepseek/deepseek-v4-pro",
+                                        "upstream":  "https://openrouter.ai/api/v1"
+                                    },
+    "adapter_sha256":  "6fb11fdda725cd3a1fce1175fcf305789cb7b975341d31b2daefc4d192106513",
+    "common_sha256":  "7c7329535a6ff710922ebc8c354d568d8d8aba06e01cc55785b59f6b272193f3",
+    "runner_sha256":  "16b6cedae8f2a3dd15f75399a9318453288517fa62f6ed4e6545da2924212a27",
+    "adapter_version":  "0.2.0",
+    "compiler":  "canonical-history-v1",
+    "target_model":  "deepseek/deepseek-v4-pro"
+}

@@ -1,0 +1,12 @@
+﻿PASS: 14-search real failure shape canonicalized in one pass.
+PASS: null search arrays became schema-valid arrays.
+PASS: structured local tool payloads became JSON strings.
+PASS: unknown history item used general portable-message fallback.
+PASS: full portable history compiler removed provider-specific search items.
+PASS: response-side search events were canonicalized before Grok replay.
+
+PASS: strict native mock accepted the canonical 14-search history.
+PASS: generalized portable-history retry recovered from an upstream schema rejection.
+PASS: fallback removed provider-specific search items but retained standard messages/tool history.
+PASS: full diagnostics were written before retry.
+PASS: deterministic canonical-history protocol gate completed.

@@ -1,0 +1,14 @@
+﻿{
+    "installed_at":  "2026-08-03T15:42:14.0922041+08:00",
+    "backup":  "C:\\pinchbench-grok-build\\packages\\hotfix-backup\\reasoning-summary-v0.1.4-20260803-154211",
+    "adapter_sha256":  "9d85f6a95d8e5065f38a0106adc4f350e96ab432a3e318ae3d713de9d877582a",
+    "common_sha256":  "41658b3b671e0ee34faa3f8f930011a0acf887eb6fc429d0a207695843bf9355",
+    "runner_sha256":  "4f2577852d6de7c80a97f068eb90a92121df95c6144d8fb77f8554136c82a1d7",
+    "live_adapter_before_restart":  {
+                                        "ok":  true,
+                                        "name":  "grok-build-search-adapter",
+                                        "version":  "0.1.3",
+                                        "target_model":  "deepseek/deepseek-v4-pro",
+                                        "upstream":  "https://openrouter.ai/api/v1"
+                                    }
+}

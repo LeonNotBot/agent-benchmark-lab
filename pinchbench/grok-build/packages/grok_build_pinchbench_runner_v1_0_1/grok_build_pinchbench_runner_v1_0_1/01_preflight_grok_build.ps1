@@ -1,0 +1,4 @@
+﻿param([string]$Root="C:\pinchbench-grok-build",[string]$Python="",[string]$SkillDir="",[string]$ProxyUrl="http://127.0.0.1:10090",[string]$AdapterUrl="http://127.0.0.1:8767")
+$ErrorActionPreference="Stop";. (Join-Path $PSScriptRoot "common_grok_build_runner.ps1");Set-GrokBenchmarkEnvironment -Root $Root -ProxyUrl $ProxyUrl;Assert-OpenRouterKey;$null=Assert-GrokSearchAdapter -AdapterUrl $AdapterUrl;$p=Resolve-GrokRunnerPaths -Root $Root -Python $Python -SkillDir $SkillDir
+& $p.Python -X utf8 $p.Runner --skill-dir $p.Skill --grok-build-cli $p.Grok --grok-build-home $p.Home --adapter-url $AdapterUrl --suite all --judge-model openrouter/anthropic/claude-opus-5 --preflight --verbose
+if($LASTEXITCODE-ne 0){throw "Grok Build preflight failed with exit code $LASTEXITCODE"};Write-Host "PASS: preflight completed." -ForegroundColor Green

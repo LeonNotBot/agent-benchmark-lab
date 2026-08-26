@@ -1,0 +1,4 @@
+﻿binary=C:\pinchbench-grok-build\bin\grok.exe
+version=grok 0.2.118 (1e1687c1cf)
+sha256=8b365d13ba0956bd8015069a7230370dd11496cd18d03b5eb148a329a8d96f7c
+binary_committed=false

@@ -1,0 +1,10 @@
+﻿PASS: original run is ready for canonical v0.2.0 resume.
+Run dir   : /tmp/canonical-cleanup-test-cdmdm4ov/pinchbench-grok-build/runs/grok_build_20260803_134437
+Backup    : /tmp/canonical-cleanup-test-cdmdm4ov/pinchbench-grok-build/runs/grok_build_20260803_134437/protocol-hotfix-backup/canonical-history-v0.2.0a-20260803-084304
+Remaining : 14 completed rows
+Removed   : task_deep_research (failed execution, preserved score=0.88)
+Pending   : task_deep_research
+Pending   : task_oss_alternative_research
+Pending   : task_pricing_research
+Canary 1  : task_deep_research score=0.77
+Canary 2  : task_oss_alternative_research score=0.84

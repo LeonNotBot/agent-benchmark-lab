@@ -1,0 +1,10 @@
+﻿{
+    "installed_at":  "2026-08-03T15:14:49.0678062+08:00",
+    "file":  "C:\\pinchbench-grok-build\\runner\\common_grok_build_runner.ps1",
+    "backup":  "C:\\pinchbench-grok-build\\runner\\hotfix-backup\\adapter-gate-v0.1.3-20260803-151449\\common_grok_build_runner.ps1",
+    "before_sha256":  "af1efacb807588dcdfee76ada2bacc6b11592f98ded57a7e8338b0083f218541",
+    "after_sha256":  "4d0cdc45e6608b71523bb2868809855f9decfdf1b15b83f2d2448d29a257b9e8",
+    "changed":  true,
+    "old_gate":  "0.1.2",
+    "new_gate":  "0.1.3"
+}
