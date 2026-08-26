@@ -1,0 +1,19 @@
+[CCB] READY
+Path: C:\pinchbench-ccb\runs\ccb_20260722_151353
+Warnings: None
+Errors: None
+
+[Codex] READY
+Path: C:\pinchbench-codex\runs\codex_20260727_174711
+Warnings: None
+Errors: None
+
+[OpenCode] READY
+Path: C:\pinchbench-opencode\runs\opencode_20260724_094110
+Warnings: None
+Errors: None
+
+[Qwen Code] READY
+Path: C:\pinchbench-qwen-code\runs\qwen_code_20260724_175038
+Warnings: None
+Errors: None

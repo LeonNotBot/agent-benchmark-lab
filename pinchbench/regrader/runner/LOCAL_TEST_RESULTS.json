@@ -1,0 +1,99 @@
+{
+  "python_compile": "PASS",
+  "reference_runner_compile": "PASS",
+  "source_contract": {
+    "commit": "819384ae830492365b8363fc26bc2602e73f216d",
+    "manifest_sha256": "1aa459555d14c9ad48971e9a20bc10a7f63cbdae127f59677dd2796eac5c13ec",
+    "formal_task_count": 143,
+    "original_judge_model": "openrouter/anthropic/claude-haiku-4.5"
+  },
+  "synthetic_preflight": {
+    "agents": 4,
+    "formal_tasks_per_agent": 143,
+    "result": "PASS"
+  },
+  "synthetic_smoke": {
+    "agents": 1,
+    "tasks": 3,
+    "grading_types": [
+      "automated",
+      "hybrid",
+      "llm_judge"
+    ],
+    "completed": 3,
+    "failed": 0,
+    "result": "PASS"
+  },
+  "synthetic_full_queue_creation": {
+    "agents": 4,
+    "tasks_per_agent": 143,
+    "jobs": 572,
+    "expected_jobs": 572,
+    "result": "PASS"
+  },
+  "old_grading_fields_removed": "PASS (fake grader asserted absence)",
+  "source_workspace_mutation": "NONE (fake grader mutation remained scratch-only)",
+  "xlsx_exports": "PASS",
+  "powershell_static": {
+    "00_install_regrader.ps1": {
+      "ascii": true,
+      "brace_balance": true,
+      "paren_balance": true,
+      "unsafe_native_pipeline": false
+    },
+    "01_preflight_regrade.ps1": {
+      "ascii": true,
+      "brace_balance": true,
+      "paren_balance": true,
+      "unsafe_native_pipeline": false
+    },
+    "02_run_regrade_smoke.ps1": {
+      "ascii": true,
+      "brace_balance": true,
+      "paren_balance": true,
+      "unsafe_native_pipeline": false
+    },
+    "03_monitor_regrade.ps1": {
+      "ascii": true,
+      "brace_balance": true,
+      "paren_balance": true,
+      "unsafe_native_pipeline": false
+    },
+    "04_run_regrade_full.ps1": {
+      "ascii": true,
+      "brace_balance": true,
+      "paren_balance": true,
+      "unsafe_native_pipeline": false
+    },
+    "05_resume_regrade.ps1": {
+      "ascii": true,
+      "brace_balance": true,
+      "paren_balance": true,
+      "unsafe_native_pipeline": false
+    },
+    "06_stop_regrade.ps1": {
+      "ascii": true,
+      "brace_balance": true,
+      "paren_balance": true,
+      "unsafe_native_pipeline": false
+    },
+    "07_finalize_regrade.ps1": {
+      "ascii": true,
+      "brace_balance": true,
+      "paren_balance": true,
+      "unsafe_native_pipeline": false
+    },
+    "08_bundle_regrade_results.ps1": {
+      "ascii": true,
+      "brace_balance": true,
+      "paren_balance": true,
+      "unsafe_native_pipeline": false
+    },
+    "common_regrade.ps1": {
+      "ascii": true,
+      "brace_balance": true,
+      "paren_balance": true,
+      "unsafe_native_pipeline": false
+    }
+  }
+}

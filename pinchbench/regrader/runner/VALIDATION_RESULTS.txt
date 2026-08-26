@@ -1,0 +1,44 @@
+PinchBench frozen regrader v1 validation
+========================================
+
+Source files inspected:
+- formal Codex Windows Runner
+- formal Codex results.json
+- formal Codex run_config.json
+- tasks/manifest.yaml
+
+Verified source contract:
+- PinchBench commit:
+  819384ae830492365b8363fc26bc2602e73f216d
+- Manifest SHA256:
+  1aa459555d14c9ad48971e9a20bc10a7f63cbdae127f59677dd2796eac5c13ec
+- Original Judge:
+  openrouter/anthropic/claude-haiku-4.5
+- Formal task count:
+  143
+- Grading call:
+  lib_grading.grade_task(
+      task=task,
+      execution_result=...,
+      skill_dir=skill_dir,
+      judge_model=...,
+      judge_timeout_seconds=...,
+      judge_backend="api",
+      verbose=...
+  )
+- Score normalization:
+  result.score / result.max_score when max_score != 1
+  then clamp to [0, 1].
+
+Package design checks:
+- Original score fields removed before grading.
+- Original workspace is never passed to grader.
+- Full workspace tree hash verified before and after scratch copy.
+- One worker, one job at a time.
+- Per-job process hard timeout.
+- SQLite + JSONL + task JSON persistence.
+- Model-specific Judge cache directory.
+- No automatic failed-job retry.
+- Graceful stop after current job.
+- Resume resets interrupted running jobs to pending.
+- Four-agent configuration uses readiness-confirmed formal paths.

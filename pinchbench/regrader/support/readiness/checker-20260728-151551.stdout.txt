@@ -1,0 +1,18 @@
+
+PINCHBENCH RE-GRADE READINESS CHECK
+Output: C:\pinchbench-regrade-readiness\readiness_20260728-151551
+Mode: quick
+
+CCB          READY                tasks=143/143 workspace=100.0% transcript=100.0% commit=MATCH
+  C:\pinchbench-ccb\runs\ccb_20260722_151353
+Codex        READY                tasks=143/143 workspace=100.0% transcript=100.0% commit=MATCH
+  C:\pinchbench-codex\runs\codex_20260727_174711
+OpenCode     READY                tasks=143/143 workspace=100.0% transcript=100.0% commit=MATCH
+  C:\pinchbench-opencode\runs\opencode_20260724_094110
+Qwen Code    READY                tasks=143/143 workspace=100.0% transcript=100.0% commit=MATCH
+  C:\pinchbench-qwen-code\runs\qwen_code_20260724_175038
+
+READY=4 READY_WITH_WARNINGS=0 INCOMPLETE_OR_NOT_FOUND=0
+HTML report: C:\pinchbench-regrade-readiness\readiness_20260728-151551\readiness_report.html
+No OpenRouter call was made.
+No source run file was modified.

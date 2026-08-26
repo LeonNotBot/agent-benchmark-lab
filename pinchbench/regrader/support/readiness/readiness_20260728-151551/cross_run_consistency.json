@@ -1,0 +1,17 @@
+{
+  "agents_with_task_sets": [
+    "CCB",
+    "Codex",
+    "OpenCode",
+    "Qwen Code"
+  ],
+  "union_task_count": 143,
+  "intersection_task_count": 143,
+  "all_task_sets_equal": true,
+  "missing_from_each_agent": {
+    "Codex": [],
+    "Qwen Code": [],
+    "OpenCode": [],
+    "CCB": []
+  }
+}

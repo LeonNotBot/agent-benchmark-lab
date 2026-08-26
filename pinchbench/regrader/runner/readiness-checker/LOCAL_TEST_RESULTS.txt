@@ -1,0 +1,19 @@
+Synthetic integration test: PASS
+
+PINCHBENCH RE-GRADE READINESS CHECK
+Output: /tmp/pb_readiness_test_daanzkff/out/readiness_20260728-071252
+Mode: quick
+
+CCB          READY                tasks=143/143 workspace=100.0% transcript=100.0% commit=MATCH
+  /tmp/pb_readiness_test_daanzkff/ccb/runs/ccb_formal
+Codex        READY                tasks=143/143 workspace=100.0% transcript=100.0% commit=MATCH
+  /tmp/pb_readiness_test_daanzkff/codex/runs/codex_formal
+OpenCode     READY                tasks=143/143 workspace=100.0% transcript=100.0% commit=MATCH
+  /tmp/pb_readiness_test_daanzkff/opencode/runs/opencode_formal
+Qwen Code    READY                tasks=143/143 workspace=100.0% transcript=100.0% commit=MATCH
+  /tmp/pb_readiness_test_daanzkff/qwen/runs/qwen_formal
+
+READY=4 READY_WITH_WARNINGS=0 INCOMPLETE_OR_NOT_FOUND=0
+HTML report: /tmp/pb_readiness_test_daanzkff/out/readiness_20260728-071252/readiness_report.html
+No OpenRouter call was made.
+No source run file was modified.

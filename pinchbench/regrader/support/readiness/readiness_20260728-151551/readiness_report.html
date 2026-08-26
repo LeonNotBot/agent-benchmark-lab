@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>PinchBench 重评分原始数据只读检查</title>
+<style>
+body { font-family: "Segoe UI", "Microsoft YaHei", sans-serif; margin: 28px; color: #1f2937; }
+h1 { margin-bottom: 4px; }
+.meta { color: #4b5563; margin-bottom: 22px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.card { border: 1px solid #d1d5db; border-left-width: 7px; border-radius: 8px; padding: 15px; }
+.card.ready { border-left-color: #16a34a; }
+.card.warn { border-left-color: #d97706; }
+.card.bad { border-left-color: #dc2626; }
+.status { font-weight: 700; margin-bottom: 10px; }
+.path { font-family: Consolas, monospace; overflow-wrap: anywhere; font-size: 12px; }
+table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; vertical-align: top; }
+th { background: #f3f4f6; }
+code { font-family: Consolas, monospace; }
+</style>
+</head>
+<body>
+<h1>PinchBench 重评分原始数据只读检查</h1>
+<div class="meta">
+版本 1.0.0 · 生成时间 2026-07-28T07:15:52.364099+00:00 ·
+期望任务 143 ·
+固定 commit <code>819384ae830492365b8363fc26bc2602e73f216d</code>
+</div>
+
+<div class="grid">
+
+            <section class="card ready">
+              <h2>CCB</h2>
+              <div class="status">READY</div>
+              <p><b>任务：</b>143/143</p>
+              <p><b>Workspace：</b>100.0%</p>
+              <p><b>Transcript：</b>100.0%</p>
+              <p><b>Commit：</b>MATCH</p>
+              <p class="path">C:\pinchbench-ccb\runs\ccb_20260722_151353</p>
+              <p><b>警告：</b>无</p>
+              <p><b>错误：</b>无</p>
+            </section>
+            
+            <section class="card ready">
+              <h2>Codex</h2>
+              <div class="status">READY</div>
+              <p><b>任务：</b>143/143</p>
+              <p><b>Workspace：</b>100.0%</p>
+              <p><b>Transcript：</b>100.0%</p>
+              <p><b>Commit：</b>MATCH</p>
+              <p class="path">C:\pinchbench-codex\runs\codex_20260727_174711</p>
+              <p><b>警告：</b>无</p>
+              <p><b>错误：</b>无</p>
+            </section>
+            
+            <section class="card ready">
+              <h2>OpenCode</h2>
+              <div class="status">READY</div>
+              <p><b>任务：</b>143/143</p>
+              <p><b>Workspace：</b>100.0%</p>
+              <p><b>Transcript：</b>100.0%</p>
+              <p><b>Commit：</b>MATCH</p>
+              <p class="path">C:\pinchbench-opencode\runs\opencode_20260724_094110</p>
+              <p><b>警告：</b>无</p>
+              <p><b>错误：</b>无</p>
+            </section>
+            
+            <section class="card ready">
+              <h2>Qwen Code</h2>
+              <div class="status">READY</div>
+              <p><b>任务：</b>143/143</p>
+              <p><b>Workspace：</b>100.0%</p>
+              <p><b>Transcript：</b>100.0%</p>
+              <p><b>Commit：</b>MATCH</p>
+              <p class="path">C:\pinchbench-qwen-code\runs\qwen_code_20260724_175038</p>
+              <p><b>警告：</b>无</p>
+              <p><b>错误：</b>无</p>
+            </section>
+            
+</div>
+
+<h2>四套汇总</h2>
+<table>
+<thead><tr><th>Agent</th><th>状态</th><th>任务数</th><th>Workspace</th><th>Transcript</th><th>Commit</th><th>证据文件</th><th>证据体积</th></tr></thead>
+<tbody><tr><td>CCB</td><td>READY</td><td>143</td><td>100.0%</td><td>100.0%</td><td>MATCH</td><td>935</td><td>0.20 GiB</td></tr><tr><td>Codex</td><td>READY</td><td>143</td><td>100.0%</td><td>100.0%</td><td>MATCH</td><td>3,009</td><td>0.07 GiB</td></tr><tr><td>OpenCode</td><td>READY</td><td>143</td><td>100.0%</td><td>100.0%</td><td>MATCH</td><td>1,267</td><td>0.07 GiB</td></tr><tr><td>Qwen Code</td><td>READY</td><td>143</td><td>100.0%</td><td>100.0%</td><td>MATCH</td><td>1,278</td><td>0.09 GiB</td></tr></tbody>
+</table>
+
+<h2>跨运行一致性</h2>
+<pre>{
+  &quot;agents_with_task_sets&quot;: [
+    &quot;CCB&quot;,
+    &quot;Codex&quot;,
+    &quot;OpenCode&quot;,
+    &quot;Qwen Code&quot;
+  ],
+  &quot;union_task_count&quot;: 143,
+  &quot;intersection_task_count&quot;: 143,
+  &quot;all_task_sets_equal&quot;: true,
+  &quot;missing_from_each_agent&quot;: {
+    &quot;Codex&quot;: [],
+    &quot;Qwen Code&quot;: [],
+    &quot;OpenCode&quot;: [],
+    &quot;CCB&quot;: []
+  }
+}</pre>
+
+<h2>候选运行目录</h2>
+<table>
+<thead><tr><th>Agent</th><th>已选</th><th>任务数</th><th>候选分</th><th>路径</th></tr></thead>
+<tbody><tr><td>Codex</td><td>True</td><td>143</td><td>2270</td><td class='path'>C:\pinchbench-codex\runs\codex_20260727_174711</td></tr><tr><td>Codex</td><td>False</td><td>3</td><td>1023</td><td class='path'>C:\pinchbench-codex\runs\codex_20260727_172034</td></tr><tr><td>Codex</td><td>False</td><td>3</td><td>1023</td><td class='path'>C:\pinchbench-codex\runs\codex_20260727_145725</td></tr><tr><td>Codex</td><td>False</td><td>2</td><td>1022</td><td class='path'>C:\pinchbench-codex\runs\codex_20260727_141623</td></tr><tr><td>Codex</td><td>False</td><td>2</td><td>1022</td><td class='path'>C:\pinchbench-codex\runs\codex_20260727_134135</td></tr><tr><td>Codex</td><td>False</td><td>1</td><td>1021</td><td class='path'>C:\pinchbench-codex\runs\codex_20260727_155513</td></tr><tr><td>Qwen Code</td><td>True</td><td>143</td><td>2270</td><td class='path'>C:\pinchbench-qwen-code\runs\qwen_code_20260724_175038</td></tr><tr><td>Qwen Code</td><td>False</td><td>2</td><td>1022</td><td class='path'>C:\pinchbench-qwen-code\runs\qwen_code_20260724_173013</td></tr><tr><td>Qwen Code</td><td>False</td><td>2</td><td>1022</td><td class='path'>C:\pinchbench-qwen-code\runs\qwen_code_20260724_172234</td></tr><tr><td>OpenCode</td><td>True</td><td>143</td><td>2020</td><td class='path'>C:\pinchbench-opencode\runs\opencode_20260724_094110</td></tr><tr><td>OpenCode</td><td>False</td><td>143</td><td>2020</td><td class='path'>C:\pinchbench-opencode\runs\opencode_20260721_143355</td></tr><tr><td>OpenCode</td><td>False</td><td>5</td><td>1025</td><td class='path'>C:\pinchbench-opencode\runs\opencode_20260724_092919</td></tr><tr><td>OpenCode</td><td>False</td><td>3</td><td>1023</td><td class='path'>C:\pinchbench-opencode\runs\opencode_20260723_174023</td></tr><tr><td>OpenCode</td><td>False</td><td>1</td><td>1021</td><td class='path'>C:\pinchbench-opencode\runs\opencode_20260721_142247</td></tr><tr><td>OpenCode</td><td>False</td><td>1</td><td>1021</td><td class='path'>C:\pinchbench-opencode\runs\opencode_20260721_134629</td></tr><tr><td>OpenCode</td><td>False</td><td>1</td><td>1021</td><td class='path'>C:\pinchbench-opencode\runs\opencode_20260721_134216</td></tr><tr><td>CCB</td><td>True</td><td>143</td><td>2020</td><td class='path'>C:\pinchbench-ccb\runs\ccb_20260722_151353</td></tr><tr><td>CCB</td><td>False</td><td>4</td><td>1024</td><td class='path'>C:\pinchbench-ccb\runs\ccb_20260722_145357</td></tr><tr><td>CCB</td><td>False</td><td>4</td><td>1024</td><td class='path'>C:\pinchbench-ccb\runs\ccb_20260722_141946</td></tr><tr><td>CCB</td><td>False</td><td>4</td><td>1024</td><td class='path'>C:\pinchbench-ccb\runs\ccb_20260722_140328</td></tr><tr><td>CCB</td><td>False</td><td>4</td><td>1004</td><td class='path'>C:\pinchbench-ccb\runs\ccb_20260722_135329</td></tr></tbody>
+</table>
+
+<p>本报告只检查可重评分性，不修改原始运行目录，也不会调用 OpenRouter。</p>
+</body>
+</html>

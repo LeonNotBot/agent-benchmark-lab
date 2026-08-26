@@ -1,0 +1,10 @@
+{
+  "checker_version": "1.0.0",
+  "generated_at": "2026-07-28T07:15:52.364099+00:00",
+  "mode": "quick",
+  "config_path": "C:\\pinchbench-regrader\\readiness-checker\\regrade_runs.json",
+  "output_directory": "C:\\pinchbench-regrade-readiness\\readiness_20260728-151551",
+  "expected_task_count": 143,
+  "expected_commit": "819384ae830492365b8363fc26bc2602e73f216d",
+  "source_mutation": "NONE; checker opens source paths read-only"
+}

@@ -1,0 +1,52 @@
+{
+  "expected_commit": "819384ae830492365b8363fc26bc2602e73f216d",
+  "expected_task_count": 143,
+  "runs": [
+    {
+      "agent": "Codex",
+      "runs_root": "C:\\pinchbench-codex\\runs",
+      "preferred_path": "C:\\pinchbench-codex\\runs\\codex_20260727_174711",
+      "patterns": [
+        "codex_*"
+      ]
+    },
+    {
+      "agent": "Qwen Code",
+      "runs_root": "C:\\pinchbench-qwen-code\\runs",
+      "preferred_path": "C:\\pinchbench-qwen-code\\runs\\qwen_code_20260724_175038",
+      "patterns": [
+        "qwen_code_*",
+        "qwen-code_*"
+      ]
+    },
+    {
+      "agent": "OpenCode",
+      "runs_root": "C:\\pinchbench-opencode\\runs",
+      "preferred_path": "",
+      "patterns": [
+        "opencode_*"
+      ]
+    },
+    {
+      "agent": "CCB",
+      "runs_root": "C:\\pinchbench-ccb\\runs",
+      "preferred_path": "",
+      "patterns": [
+        "ccb_*"
+      ]
+    }
+  ],
+  "hash_exclude_dirs": [
+    ".git",
+    ".venv",
+    "venv",
+    "node_modules",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".tox",
+    ".idea",
+    ".vscode"
+  ]
+}
