@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "source": "formal Gemini full-run verbose stderr",
+  "source_log": "/mnt/data/grading_diag/runner_logs/full-20260731-173521.stderr.txt",
+  "source_log_sha256": "6c12fb17f95786a1468b3c5d2c3d4c6f3e7f28a62e838a9efb64336bca33a8a0",
+  "task_count": 8,
+  "tasks": {
+    "task_csv_stations_by_elevation": {
+      "report_created": 1.0,
+      "highest_station": 1.0,
+      "lowest_station": 1.0,
+      "summary_stats": 1.0,
+      "agency_comparison": 1.0,
+      "county_analysis": 1.0,
+      "summary_paragraph": 1.0
+    },
+    "task_csv_stations_coverage": {
+      "report_created": 1.0,
+      "payette_identified": 1.0,
+      "county_counts": 1.0,
+      "elevation_bands": 1.0,
+      "agency_comparison": 1.0,
+      "missing_data": 1.0,
+      "recommendations": 1.0
+    },
+    "task_csv_stations_filter": {
+      "report_created": 1.0,
+      "nws_high_count": 1.0,
+      "nws_highest": 1.0,
+      "nrcs_custer_count": 1.0,
+      "nrcs_custer_top": 1.0,
+      "southern_filter": 1.0,
+      "cross_tabulation": 1.0
+    },
+    "task_csv_iris_classify": {
+      "report_created": 1.0,
+      "discriminating_feature": 1.0,
+      "setosa_separable": 1.0,
+      "explicit_rules": 1.0,
+      "accuracy_reported": 1.0,
+      "high_accuracy": 1.0,
+      "misclassification_analysis": 1.0,
+      "confusion_matrix": 1.0
+    },
+    "task_csv_cities_filter": {
+      "report_created": 1.0,
+      "california_filter": 0.5,
+      "southern_filter": 1.0,
+      "texas_florida_comparison": 0.5,
+      "midsize_filter": 1.0,
+      "western_coastal_filter": 1.0
+    },
+    "task_csv_cities_density": {
+      "report_created": 1.0,
+      "avg_pop_ranking": 1.0,
+      "nyc_dominance": 1.0,
+      "state_count": 0.0,
+      "single_city_states": 1.0,
+      "inequality_ratios": 1.0,
+      "regional_summary": 1.0
+    },
+    "task_csv_pension_ranking": {
+      "report_created": 1.0,
+      "top_10_listed": 1.0,
+      "ohio_first": 1.0,
+      "pennsylvania_second": 1.0,
+      "florida_third": 1.0,
+      "bottom_states": 1.0,
+      "grand_total": 0.5,
+      "payee_count_ranking": 1.0,
+      "geographic_analysis": 1.0
+    },
+    "task_meeting_advisory_acronyms": {
+      "report_created": 1.0,
+      "csmac_expanded": 1.0,
+      "ntia_expanded": 1.0,
+      "min_15_acronyms": 1.0,
+      "min_20_acronyms": 1.0,
+      "technical_acronyms": 1.0,
+      "gov_agencies": 1.0,
+      "categories_applied": 1.0,
+      "alphabetical_sort": 0.0
+    }
+  }
+}

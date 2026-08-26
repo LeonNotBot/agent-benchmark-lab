@@ -1,0 +1,4 @@
+﻿repository=https://github.com/google-gemini/gemini-cli.git
+commit=d14583b926769bd98f807cdc6b1ca50e91ae26ec
+version=0.52.0
+working_tree_at_capture=clean

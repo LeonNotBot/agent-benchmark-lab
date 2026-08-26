@@ -1,0 +1,40 @@
+{
+  "captured_at": "2026-07-28",
+  "gemini_cli_version": "0.52.0",
+  "successful_custom_model_path": "/v1beta/models/deepseek/deepseek-v4-pro:streamGenerateContent?alt=sse",
+  "request_top_level_keys": [
+    "contents",
+    "generationConfig",
+    "systemInstruction",
+    "tools"
+  ],
+  "headless_event_sequence": [
+    "init",
+    "message",
+    "result"
+  ],
+  "tool_names": [
+    "activate_skill",
+    "enter_plan_mode",
+    "glob",
+    "google_web_search",
+    "grep_search",
+    "invoke_agent",
+    "list_background_processes",
+    "list_directory",
+    "read_background_output",
+    "read_file",
+    "replace",
+    "run_shell_command",
+    "update_topic",
+    "web_fetch",
+    "write_file",
+    "write_todos"
+  ],
+  "notes": [
+    "Custom model ids are accepted by the installed Gemini CLI.",
+    "The model id is carried in the URL path rather than the JSON body.",
+    "Gemini CLI sends function declarations through tools[].functionDeclarations.",
+    "The local endpoint must return Gemini GenerateContentResponse objects over SSE."
+  ]
+}

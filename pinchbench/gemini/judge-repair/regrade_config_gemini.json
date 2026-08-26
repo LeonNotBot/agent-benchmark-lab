@@ -1,0 +1,44 @@
+﻿{
+    "schema_version":  1,
+    "expected_pinchbench_commit":  "819384ae830492365b8363fc26bc2602e73f216d",
+    "expected_manifest_sha256":  "38d7cd1bddfa5e9fefc7b6945c91955f36dc5c88c32c994bf8676344b1069a7b",
+    "skill_dir":  "C:\\pinchbench-codex\\skill",
+    "output_root":  "C:\\pinchbench-gemini\\selective-regrades",
+    "judge_model":  "openrouter/anthropic/claude-opus-5",
+    "old_judge_model":  "openrouter/anthropic/claude-opus-5",
+    "judge_backend":  "api",
+    "judge_timeout_seconds":  300,
+    "job_hard_timeout_seconds":  480,
+    "poll_seconds":  5,
+    "keep_scratch_workspaces":  false,
+    "smoke_tasks":  [
+                        "task_subway_navigation",
+                        "task_competitive_research",
+                        "task_blog",
+                        "task_csv_stock_trend",
+                        "task_csv_gdp_per_capita",
+                        "task_csv_pension_liability",
+                        "task_csv_pension_risk",
+                        "task_log_ssh_failed_logins",
+                        "task_log_hdfs_block_ops",
+                        "task_meeting_gov_speaker_summary",
+                        "task_meeting_gov_qa_extract",
+                        "task_meeting_gov_recommendations",
+                        "task_meeting_gov_data_sources",
+                        "task_csv_finance_report",
+                        "task_csv_stations_by_elevation",
+                        "task_csv_stations_coverage",
+                        "task_csv_stations_filter",
+                        "task_csv_iris_classify",
+                        "task_csv_cities_filter",
+                        "task_csv_cities_density",
+                        "task_csv_pension_ranking",
+                        "task_meeting_advisory_acronyms"
+                    ],
+    "runs":  [
+                 {
+                     "agent":  "Gemini",
+                     "path":  "C:\\pinchbench-gemini\\runs\\gemini_20260731_173523"
+                 }
+             ]
+}

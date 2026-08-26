@@ -1,0 +1,1 @@
+Reply with exactly: LOCAL_CONTRACT_PROBE_OK

@@ -1,0 +1,11 @@
+Gemini OpenRouter Adapter v1 self-test
+Executed in the build environment.
+Result: PASS
+Tests: 7
+- tool schema translation
+- function call/response history translation
+- full Gemini request translation
+- OpenRouter text SSE parsing
+- OpenRouter function-call SSE parsing
+- completed-response fallback
+- local HTTP Gemini-to-mock-OpenRouter integration

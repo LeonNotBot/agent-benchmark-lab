@@ -1,0 +1,11 @@
+{
+  "python_compile": "PASS",
+  "required_runner_contract_fragments": "PASS",
+  "powershell_ascii": "PASS",
+  "powershell_brace_parenthesis_balance": "PASS",
+  "unsafe_native_pipeline_scan": "PASS",
+  "real_key_removed_from_gemini_child": "PASS",
+  "fixed_commit_and_manifest_enforced": "PASS",
+  "default_judge": "openrouter/anthropic/claude-opus-5",
+  "packaged_file_count_before_manifests": 13
+}

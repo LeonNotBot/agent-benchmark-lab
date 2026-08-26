@@ -1,0 +1,41 @@
+PinchBench Gemini Windows Runner v1 validation
+================================================
+
+Runner revision:
+2026-07-28-gemini-cli-windows-v1-adapter-1.2
+
+Static and local checks:
+1. Python syntax compilation: PASS.
+2. Exact PinchBench grading call preserved:
+   - scripts/lib_grading.py
+   - judge_backend="api"
+   - explicit judge_model parameter only
+   - unchanged task rubric, automated checks and hybrid weights
+3. Real Gemini stream-json replay:
+   - init
+   - user/assistant message
+   - tool_use
+   - tool_result
+   - result
+   - usage/model/session parsing
+4. Fake Gemini single-task end-to-end: PASS.
+5. Fake Gemini multi-session --resume end-to-end: PASS.
+6. Fake Adapter 1.2 health and model contract: PASS.
+7. JSON, CSV, XLSX, progress and partial-result output paths: checked.
+8. Prompt transport: UTF-8 stdin, never argv.
+9. Real OPENROUTER_API_KEY removed from Gemini child environment.
+10. PinchBench commit and manifest SHA-256 enforced in preflight.
+11. Judge cache isolated by Judge model name.
+12. PowerShell native stderr handling avoids ErrorActionPreference=Stop
+    around long-running native Adapter invocation.
+13. Diagnostic manifest is generated outside staging, then moved into it;
+    it never hashes itself.
+
+Real canaries supplied by user:
+- long write: PASS
+- session first turn: PASS
+- session resume: PASS
+- total remaining canaries: 3 passed, 0 failed
+
+The 3-task PinchBench smoke must still be run on the user's Windows host
+before starting the formal 143-task suite.
