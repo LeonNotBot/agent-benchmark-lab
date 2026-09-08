@@ -1,0 +1,4 @@
+name,vendor,reference
+segment_1,/path/to/segment_1.wav.txt,/path/to/segment_1_eval_units_merged_reference.ods
+segment_2,/path/to/segment_2.wav.txt,/path/to/segment_2_eval_units_merged_reference.ods
+segment_3,/path/to/segment_3.wav.txt,/path/to/segment_3_eval_units_merged_reference.ods

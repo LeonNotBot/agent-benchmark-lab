@@ -1,0 +1,113 @@
+# ==================== 音频文件 ====================
+# WAV/MP3 音频（太大，不上传）
+**/*.wav
+**/*.mp3
+**/*.m4a
+*.wav
+*.mp3
+*.m4a
+
+# 模型输出和转写结果
+wav_2_txt/output/**
+
+# 评测输入数据（包含业务数据）
+translation_eval_final_v3_manual_scoring_cn/input/**/*.csv
+translation_eval_final_v3_manual_scoring_cn/input/**/*.ods
+translation_eval_final_v3_manual_scoring_cn/input/**/*.xlsx
+translation_eval_final_v3_manual_scoring_cn/input/**/*.txt
+
+# 评测结果输出（包含评分和分析）
+translation_eval_final_v3_manual_scoring_cn/output_manual/**
+translation_eval_final_v3_manual_scoring_cn/output/**
+
+# 不上传报告生成脚本
+translation_eval_final_v3_manual_scoring_cn/generate_deliverable_report.py
+
+# SOP 文档（不上传）
+**/SOP_*.md
+
+# ==================== 二进制文件和安装包 ====================
+# DLL/可执行文件
+*.dll
+*.exe
+*.so
+*.dylib
+*.bin
+
+# 压缩包和安装文件
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+._*.tar.gz
+
+# Office 文档（业务文档）
+*.docx
+*.doc
+*.xlsx
+*.pptx
+
+# ==================== SDK 和第三方库 ====================
+# Lenovo SDK
+LenovoSpeech_*/
+LenovoAILabWavSTT/bin/*.dll
+LenovoAILabWavSTT/bin/*.exe
+LenovoAILabWavSTT/output/
+LenovoAILabWavSTT/wav/
+
+# ==================== Python 虚拟环境 ====================
+# 完整的 site-packages
+**/Lib/site-packages/
+**/lib/python*/
+translation/
+venv/
+env/
+ENV/
+.venv
+
+# ==================== Python 缓存和构建产物 ====================
+# 缓存
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# PyInstaller 构建产物
+build/
+**/build/
+dist/
+**/dist/
+*.spec
+*.toc
+*.pyz
+*.pkg
+
+# IDE 配置
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志文件
+*.log
+
+# 临时文件
+*.tmp
+*.bak
+*.old
+
+# 敏感信息
+*secret*
+*密钥*
+.env
+config_private.py
+
+# 保留目录结构的占位文件除外
+!.gitkeep
