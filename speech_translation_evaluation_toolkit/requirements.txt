@@ -1,0 +1,21 @@
+# 核心依赖
+pandas>=2.0.0
+openpyxl>=3.0.0
+sentence-transformers>=2.2.0
+bert-score>=0.3.13
+torch>=2.0.0
+
+# 数据处理
+numpy>=1.24.0
+
+# 文本处理
+transformers>=4.30.0
+
+# Excel/ODS 支持
+odfpy>=1.4.1
+
+# Azure Speech (如需使用 Azure 转写)
+azure-cognitiveservices-speech>=1.30.0
+
+# 可选：用于报告生成
+tabulate>=0.9.0
