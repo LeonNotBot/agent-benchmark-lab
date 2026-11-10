@@ -5,9 +5,9 @@
 ## 快速开始（3 分钟）
 
 ```bash
-# 1. 解包
-tar xzf ocrbench_v2_minimal.tar.gz
-cd ocrbench_v2_minimal
+# 1. 获取代码（必须在本目录下运行，spotting 评分使用相对路径）
+git clone https://github.com/LeonNotBot/agent-benchmark-lab.git
+cd agent-benchmark-lab/OCRBench_v2
 
 # 2. 安装依赖
 pip install -r requirements.txt
@@ -104,11 +104,13 @@ python run_ocrbench_v2.py --model qwen/qwen2.5-vl-72b-instruct --workers 8
 
 ### 3. `*_OCRBench_v2_score.json` - 最终报告
 
+以下数值仅示意格式（来自 60 条抽样的冒烟测试），不代表任何模型的真实成绩：
+
 ```json
 {
   "en_text_recognition": 0.609,
   "en_text_detection": 0.125,
-  "en_text_spotting": 0.500,
+  "en_text_spotting": 0.0,
   "en_relationship_extraction": 0.922,
   "en_element_parsing": 0.341,
   "en_mathematical_calculation": 0.940,
@@ -201,24 +203,20 @@ API_URL = "http://localhost:8000/v1/chat/completions"  # 改成你的本地端�
 api_key = os.getenv("OPENROUTER_API_KEY", "local")  # 可以改成任意值或去掉校验
 ```
 
-然后运行：
-```bash
-python run_ocrbench_v2.py --model qwen:vl-72b-instruct
-```
+然后 `--model` 传你本地服务注册的模型名即可。
 
 ### Q4: 能只评测某几个题型吗？
 
-**方法 1**：修改已有预测文件
-- 编辑 `*_OCRBench_v2.json`，只保留想要的题型
-- 删除对应的 checkpoint.pkl
-- 用 `--resume` 重新评分
+**方法 1**：只对已有预测重新评分
+- 从 `*_OCRBench_v2.json` 中筛出想要的题型，另存为新文件
+- 按 Q5 的方式直接调用 `process_predictions` 评分（不要删 checkpoint，删了再 `--resume` 会重跑全部推理）
 
 **方法 2**：修改代码
 在 `run_ocrbench_v2.py` 第 492 行加载 TSV 后，过滤 dataframe：
 ```python
 df = pd.read_csv(tsv_path, sep="\t", keep_default_na=False)
-# 添加这行：只保留特定题型
-df = df[df['category'].isin(['Text Recognition', 'Text Detection'])]
+# 添加这行：只保留特定题型（category 列的值就是题型名）
+df = df[df['category'].isin(['text recognition en', 'full-page OCR cn'])]
 ```
 
 ### Q5: 怎样导入自己的预测结果？
@@ -263,7 +261,7 @@ pickle.dump(checkpoint, open("checkpoint.pkl", "wb"))
 - `timeout`: 600 秒
 - `retry`: 3 次，每次间隔 0-10 秒
 
-修改 `run_ocrbench_v2.py` 第 185-260 行的 `call_openrouter_api` 函数。
+修改 `run_ocrbench_v2.py` 第 195 行起的 `call_openrouter_api` 函数。
 
 ## 性能指标
 
@@ -273,8 +271,7 @@ pickle.dump(checkpoint, open("checkpoint.pkl", "wb"))
 | **任务类型** | 30 种（21 英文 + 9 中文）|
 | **TSV 文件大小** | ~1.4 GB |
 | **图片数量** | 10,000 张 JPG |
-| **磁盘占用** | ~2 GB（data/ 文件夹） |
-| **评分耗时** | ~5 分钟（全流程） |
+| **磁盘占用** | ~2.4 GB（TSV 1.4 GB + 解码图片 1.0 GB） |
 
 ## 目录结构
 
@@ -310,7 +307,7 @@ ocrbench_v2_minimal/
 
 ## 依赖说明
 
-- **Python**: 3.8+
+- **Python**: 已在 3.14 上验证安装和评分，其他版本未测
 - **推理 API**: OpenRouter（兼容 OpenAI 接口的任何服务都可以）
 - **图像处理**: Pillow, numpy
 - **评分库**: distance, apted, lxml, zss, Levenshtein, editdistance, nltk, jieba
@@ -345,5 +342,5 @@ ocrbench_v2_minimal/
 
 ---
 
-**更新时间**: 2024-11-09  
+**更新时间**: 2026-11-10  
 **对齐版本**: VLMEvalKit OCRBench v2
