@@ -1,0 +1,15 @@
+pandas
+requests
+Pillow
+tqdm
+numpy
+distance
+apted
+lxml
+zss
+Levenshtein
+editdistance
+nltk
+jieba
+Polygon3
+ipdb

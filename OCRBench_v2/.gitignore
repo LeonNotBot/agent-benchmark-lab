@@ -1,0 +1,8 @@
+data/
+outputs/
+__pycache__/
+*.pyc
+eval_scripts/spotting_eval/gt/
+eval_scripts/spotting_eval/submit/
+eval_scripts/spotting_eval/*.zip
+.DS_Store
